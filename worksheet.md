@@ -8,17 +8,19 @@ ACM Curriculum
 ##	Information about owner (server, person or company)
 ##	Identity and Signature of verifying entity
 ##	Common fields: Subject Name, Subject Alternate Name, Expiry, serial #, Issuer, Not Before, Not After, Key Usage, EKU, Sig Alg
-9.	Certificate Hierarchy: Root, inter, end entity
-10.	Certificate Authority and their roles
+##	Certificate Hierarchy: Root, inter, end entity
+##	Certificate Authority and their roles
+
 Use real examples
 Good certificate vs bad
 Automated
-2.	Introduction to Openssl - 15 minutes
+
+#	Introduction to Openssl - 15 minutes
 Figure out a scenario – for example, working in a SOC, etc.
 
-11.	Different cli options
+##	Different cli options
 
-==> openssl version -a                                         
+==> openssl version -a
 OpenSSL 1.1.1b  26 Feb 2019
 built on: Wed Apr  3 10:50:23 2019 UTC
 platform: debian-amd64
@@ -266,7 +268,7 @@ cyber%
 
 
 
-12.	PEM vs DER and other formats
+##	PEM vs DER and other formats
 Different encoding types
 -	Distinguished Encoding Rules
 A binary format to encode ASN.1 data structures.
@@ -278,8 +280,8 @@ Base64 encoded file, making it easy to send the data by different methods, such 
 
 Malwares use base64 encoded for encoding javascript or other code.
 
-3.	Key Pair Usage - hands on - 30 minutes
-13.	Generate RSA key pair
+#	Key Pair Usage - hands on - 30 minutes
+##	Generate RSA key pair
 ==> openssl genrsa        
 Generating RSA private key, 2048 bit long modulus (2 primes)
 .....+++++
@@ -521,7 +523,7 @@ YQIDAQAB
 cyber%
 
 
-14.	Generate ECC key pair
+##	Generate ECC key pair
 
 ==> openssl ecparam -name prime256v1 -genkey -noout -out eckey.pem
 cyber% ls -al
@@ -548,7 +550,7 @@ VfwY7qpO42uNvbfrG4nTE/nKQoNBtSDWHrdzYD7ZkPN9fPULdVBvwQ4t2w==
 -----END PUBLIC KEY-----
 cyber% 
 
-15.	Sign and verify using keys
+##	Sign and verify using keys
 Sign
 cyber% cat textfile
 This is a test file"
@@ -610,7 +612,7 @@ cyber% hexdump textfile.sha256.sign
 0000100
 cyber%
 
-16.	Encrypt and Decrypt using keys
+##	Encrypt and Decrypt using keys
 
 Encryption is done using public key by anyone wanting to send confidential data to a receiver. Receiver will use the private key to decrypt data.
 
@@ -650,8 +652,8 @@ Certificate Signing Requests are formal requests asking a CA to sign a certifica
 
 This is an interactive way and you must give “.” for empty fields.
 
-17.	Create CSR
-1.	Create a key pair and extract the public key into a separate file. Use a password if you would like to.
+#	Create CSR
+##	Create a key pair and extract the public key into a separate file. Use a password if you would like to.
 ==> openssl genrsa -out certkey.key 2048
 Generating RSA private key, 2048 bit long modulus (2 primes)
 ...+++++
@@ -673,7 +675,7 @@ drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
 -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  7 11:32 certpubkey.key
 cyber%
 
-2.	Create CSR
+##	Create CSR
 ==> openssl req -new -key certkey.key -out cert.csr
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
@@ -754,7 +756,7 @@ The CSR is signed with the private key and contains the public key. Signing with
 
 How does the CA know that you are the organization you claim to be and verify that your key really is as defined in the CSR? This is an operational aspect. This is handled using “human” approaches or by verifying the ownership of the domain or by checking against the person or … For websites, this mechanism is identified in the Baseline Requirements of the CA/Browser Forum.
 
-18.	Options for CSR
+##	Options for CSR
 There are many options for generating a CSR as described above. There are two ways to fill the CSR request. Using openssl as above is a manual approach. You have to interactively enter the information. Instead you can setup a config file to automate this process. Automation is important in order to regularly order new certificates or renew existing ones. We will discuss renewal later.
 
 Create a config file that has the information requested in the CSR request generation and pass that config file to the openssl.
@@ -784,10 +786,11 @@ drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
 cyber%
 
 There is a difference in SubjectName between cert.csr and certwithconf.csr. Identify it.
-19.	Self-sign certificate
+
+##	Self-sign certificate
 Now we need to sign the certificates. There are two ways to do this:
-1.	If the certificate is used internally within the organization, then it can be self-signed. This only ensures that the information within the certificate is not modified but doesn’t provide any security to the outside world. For instance, I can create a certificate for www.google.com and sign it myself. But that doesn’t make me www.google.com. Nobody should look at a self signed certificate and assume it is google.com.
-2.	Use a Certificate Authority to sign the certificate. CAs are trusted entities, who do validation of information and make sure you are Google Inc and you own the website www.google.com  before signing and issuing the certificate. This is similar to public notary service.
+-	If the certificate is used internally within the organization, then it can be self-signed. This only ensures that the information within the certificate is not modified but doesn’t provide any security to the outside world. For instance, I can create a certificate for www.google.com and sign it myself. But that doesn’t make me www.google.com. Nobody should look at a self signed certificate and assume it is google.com.
+-	Use a Certificate Authority to sign the certificate. CAs are trusted entities, who do validation of information and make sure you are Google Inc and you own the website www.google.com  before signing and issuing the certificate. This is similar to public notary service.
 CA signed certificates are needed to expose the service to the general public, while for internal applications it is sufficient to self-sign the certificates.
 You have to specify the validity of the certificate in terms of “Not Valid Before” and “Not Valid After”.
 
@@ -886,7 +889,7 @@ cyber%
 
 Identify the difference between CSR and Certificate.
 
-20.	Extensions
+##	Extensions
 You can add extensions to the certificate. A common extension is Subject Alternate Name (SAN). This lists all the possible names that the certificate can be used for. In the case of Web PKI, it lists all the domain names, such as www.coolcompany.example, my.coolcompany.example, coolcompany.example and so on. There are many other extensions possible, such as what the key can be used for.
 
 When creating the certificate, you can create an extensions file and use that as part of the certificate creation.
@@ -901,16 +904,16 @@ cyber%
 
  TBD: not working
 
-21.	Examining Public CA certificate
+##	Examining Public CA certificate
 
-5.	Certificate Hierarchy - 30 minutes
+#	Certificate Hierarchy - 30 minutes
 Root certificates / self-signed certificates are not usually used in any application. 
-22.	Certificate Hierarchy
-23.	Self-signed certs
-24.	Root store - Mozilla, Apple, Microsoft
+##	Certificate Hierarchy
+##	Self-signed certs
+##	Root store - Mozilla, Apple, Microsoft
 
 
-25.	Setup a CA
+##	Setup a CA
 Requires a set of configuration in OpenSSL. Configuration for OpenSSL is powerful.
 
 Directory Structure
@@ -1143,7 +1146,7 @@ cyber%
 
 
 
-26.	Create Sub-CA
+##	Create Sub-CA
 
 ==> openssl req -new -config sub-ca.conf -out sub-ca.csr -keyout private/sub-ca.key
 Generating a RSA private key
@@ -1370,7 +1373,7 @@ drwx------ 2 cybersecurity cybersecurity 4096 Jun 15 12:24 private
 -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:41 sub-ca.csr
 cyber% 
 
-27.	Create server certificates
+##	Create server certificates
 ==> openssl genrsa -out serverkey.key
 Generating RSA private key, 2048 bit long modulus (2 primes)
 ..............................................................+++++
@@ -1754,7 +1757,7 @@ Certificate:
          7a:07:a6:a4:aa:95:a8:92
 cyber% 
 
-28.	Create Client Certificate
+##	Create Client Certificate
 
 ber% openssl genrsa -out clientkey.key 4096                                                    
 Generating RSA private key, 4096 bit long modulus (2 primes)
@@ -2088,7 +2091,7 @@ Certificate:
          7b:de:9d:d8:88:19:2d:51
 cyber% 
 
-29.	Launch client and server
+##	Launch client and server
 We can now use these certificates to launch a TLS server and client. This is a sample client and server with openssl.
 
 Server: openssl s_server -cert server.crt -key serverkey.key
@@ -2096,7 +2099,7 @@ Client: openssl s_client
 
 Client complains that it does not know the certificate chain. We need to inform the client that certain certificates – the root certificate specifically and possibly more – are intrinsically trusted. These trusted certificates are inserted into a trust store.
 
-30.	Looking up Services
+##	Looking up Services
 Lets look at a few different websites and see their structure. Use the browser to confirm the certificate used.
 
 ==> openssl s_client -connect www.google.com:443
@@ -2393,23 +2396,24 @@ Certificate:
          b7:20:8f:f0
 cyber% 
 
-6.	Communication Channels - 30 minutes
-31.	Using encryption and signing for communication
-32.	TLS Protocol
-33.	Wireshark using standard TLS server and client
-34.	Create server
-35.	Reuse existing keys
-36.	Code and run server
-7.	Create client - 30 minutes
-37.	Code and run client
-38.	Setup communication between server and client (no client auth)
-39.	Create client keys, CSR and sign
-40.	Use client with client auth
-41.	Wireshark for TLS exchange
-8.	HTTPS - 30 minutes
-42.	Create keys, CSR and sign certificate
-43.	Setup NGINX with certificate
-44.	Use browser to access https site
+#	Communication Channels - 30 minutes
+##	Using encryption and signing for communication
+##	TLS Protocol
+##	Wireshark using standard TLS server and client
+##	Create server
+##	Reuse existing keys
+##	Code and run server
+
+#	Create client - 30 minutes
+##	Code and run client
+##	Setup communication between server and client (no client auth)
+##	Create client keys, CSR and sign
+##	Use client with client auth
+##	Wireshark for TLS exchange
+#	HTTPS - 30 minutes
+##	Create keys, CSR and sign certificate
+##	Setup NGINX with certificate
+##	Use browser to access https site
 
 
 
