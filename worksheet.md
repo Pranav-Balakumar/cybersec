@@ -2224,7 +2224,19 @@ to inform the client that certain certificates – the root certificate
 specifically and possibly more – are intrinsically trusted. These
 trusted certificates are inserted into a trust store.
 
-TBD: create a trust store for the client
+A trust store is created by concatenating all the certificates in the
+chain into a single file.
+
+    cat root-ca.crt sub-ca.crt > chain.crt
+
+Now use the chain as the truststore.
+
+    Client: openssl s_client -CAfile chain.crt
+
+You can have separate certificates for the client and this will be
+sent to the server as well.
+
+    Client: openssl s_client -CAfile chain.crt -cert client.crt -key clientkey.key
 
 ##	Looking up Services
 Lets look at a few different websites and see their structure. Use the
@@ -2541,6 +2553,7 @@ Yahoo:
 ##	Create client keys, CSR and sign
 ##	Use client with client auth
 ##	Wireshark for TLS exchange
+
 #	HTTPS - 30 minutes
 ##	Create keys, CSR and sign certificate
 ##	Setup NGINX with certificate
