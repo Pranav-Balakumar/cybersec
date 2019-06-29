@@ -1,9 +1,5 @@
 #	Certificate Hierarchy
-Root certificates / self-signed certificates are not usually used in any application. 
-
-##	Certificate Hierarchy
-##	Self-signed certs
-##	Root store - Mozilla, Apple, Microsoft
+Root certificates / self-signed certificates are not usually used in any application. CAs must provide certificates after due validation of identity.
 
 
 ##	Setup a CA
@@ -26,8 +22,7 @@ Directory Structure
 * Db/crlnumber: Certificate Revocation List
 * Private: Contains all the private keys and must be protected
 
-Config file
-(see in VM)
+Config file: in cert-hier/root-ca directory
 
 Create root key and CSR request
 

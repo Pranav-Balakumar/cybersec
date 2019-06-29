@@ -278,6 +278,21 @@ Get text equivalent of the RSA key.
     VfwY7qpO42uNvbfrG4nTE/nKQoNBtSDWHrdzYD7ZkPN9fPULdVBvwQ4t2w==
     -----END PUBLIC KEY-----
 
+##	PEM vs DER and other formats
+Different encoding types
+
+  * Distinguished Encoding Rules: A binary format to encode ASN.1 data structures.
+Decoders: https://lapo.it/asn1js//
+
+
+  * Privacy Enhanced Mail
+Base64 encoded file, making it easy to send the data by different methods, such as emails.
+
+While base64 is a great format to send binary information as text, it
+is also used by malwares for encoding javascript or other code. This
+code in ASCII format can then can be converted to binary on the device
+and run as binary code.
+
 
 ##	Sign and verify using keys
 ### Sign

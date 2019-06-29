@@ -4,6 +4,16 @@ Certificate Signing Requests are formal requests asking a CA to sign a
 certificate. The CSR is signed with the private key and internally the
 CSR contains the details of the organization and the public key.
 
+1. First you create a key pair.
+2. Store the private key carefully
+3. The public key must be given to the CA
+4. Certificates also carry identity of the person / organization who owns the public - private key pair.
+5. This identity must be verified, typically in an out-of-band way. For instance a domain is verified by running a domain query. User certificates must be identified by a personal identity card. And so on. Different CAs have different methods and requirements to verify identity. For web PKI and browser use of certificates, there are Baseline Requirements defined by the CA/Browser Forum.
+6. Once the CA verifies the identity, they sign and issue a certificate
+7. The certificate can also be self-signed but it's trustworthiness is dependent on the user.
+
+Now we will go through the process.
+
 ##	Create Key Pair
 
 Create a key pair and extract the public key into a separate file. Use
@@ -129,11 +139,15 @@ Requirements of the CA/Browser Forum.
 
 ##	Options for CSR
 There are many options for generating a CSR as described above. There
-are two ways to fill the CSR request. Using openssl as above is a
+are two ways to fill the CSR request.
+
+* Using openssl interactively as above is a
 manual approach. You have to interactively enter the
-information. Instead you can setup a config file to automate this
+information.
+
+* Instead you can setup a config file to automate this
 process. Automation is important in order to regularly order new
-certificates or renew existing ones. We will discuss renewal later.
+certificates or renew existing ones.
 
 Create a config file that has the information requested in the CSR
 request generation and pass that config file to the openssl.
@@ -167,7 +181,7 @@ request generation and pass that config file to the openssl.
     -rw-r--r-- 1 cybersecurity cybersecurity  191 Jun  7 12:36 csr.cnf
     cyber%
 
-There is a difference in SubjectName between cert.csr and certwithconf.csr. Identify it.
+Question: There is a difference in SubjectName between cert.csr and certwithconf.csr. Identify it.
 
 ##	Self-sign certificate
 
@@ -186,8 +200,7 @@ entities, who do validation of information and make sure you are
 Google Inc and you own the website www.google.com before signing and
 issuing the certificate. This is similar to public notary service.  CA
 signed certificates are needed to expose the service to the general
-public, while for internal applications it is sufficient to self-sign
-the certificates.  You have to specify the validity of the certificate
+public. You have to specify the validity of the certificate
 in terms of “Not Valid Before” and “Not Valid After”.
 
 ==> openssl x509 -req -days 365 -in cert.csr -signkey certkey.key -out cert.crt
@@ -195,6 +208,7 @@ in terms of “Not Valid Before” and “Not Valid After”.
     Signature ok
     subject=C = IN, ST = Tamil Nadu, L = Chennai, O = My Cool Company Ltd, OU = Finance, CN = www.coolcompany.example, emailAddress = admin@coolcompany.example
     Getting Private key
+
     cyber% ls -al
     total 32
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  8 20:56 .
@@ -205,7 +219,7 @@ in terms of “Not Valid Before” and “Not Valid After”.
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  7 11:32 certpubkey.key
     -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jun  7 12:40 certwithconf.csr
     -rw-r--r-- 1 cybersecurity cybersecurity  191 Jun  7 12:36 csr.cnf
-    cyber%
+
     cyber% cat cert.crt
     -----BEGIN CERTIFICATE-----
     MIID6TCCAtECFBd6XHDLuc9Yh6StlgbJH6F6yUXfMA0GCSqGSIb3DQEBCwUAMIGw
@@ -285,7 +299,7 @@ in terms of “Not Valid Before” and “Not Valid After”.
              29:35:66:43
     cyber%
 
-Identify the difference between CSR and Certificate.
+Question: Identify the difference between CSR and Certificate.
 
 ##	Extensions
 You can add extensions to the certificate. A common extension is
@@ -308,6 +322,4 @@ use that as part of the certificate creation.
 
  TBD: not working
 
-##	Examining Public CA certificate
-TBD: get root store and check
 
