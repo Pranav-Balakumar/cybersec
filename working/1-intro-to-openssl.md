@@ -163,7 +163,7 @@ Figure out a scenario – for example, working in a SOC, etc.
     *** WARNING : deprecated key derivation used.
     Using -iter or -pbkdf2 would be better.
     asdddddddfjjjjjjjjjjkaaaaaaaajjjjjjjj
-    Salted__Q�!R���G�A�i����0�����A�h���>	���u�I�����n��z�0"m}%                                                                                                                                               cyber%
+    Salted__Q�!R���G�A�i����0�����A�h���>	���u�I�����n��z�0"m}%                                                                                                                                               
 
 
 ==> openssl dgst -help
@@ -207,15 +207,17 @@ Figure out a scenario – for example, working in a SOC, etc.
 
 ==> openssl sha512 -out file.hash file
 
-    cyber% ls -al
+==> ls -al
+
     total 16
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  4 09:13 .
     drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun  2 15:07 ..
     -rw-r--r-- 1 cybersecurity cybersecurity   15 Jun  2 15:09 file
     -rw-r--r-- 1 cybersecurity cybersecurity  143 Jun  4 09:13 file.hash
-    cyber% cat file.hash
+
+==> cat file.hash
+
     SHA512(file)= 62f1c73922ba448579d9229f932e747c23d53400a6fb826c6ea5f478247420c62b681cd636840e0ae8556bcde856a24c0123c501aa3967c42530e3be8cb6de75
-    cyber%
 
 
 ==> openssl rand 100     

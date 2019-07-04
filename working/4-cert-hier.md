@@ -37,7 +37,8 @@ configuration details.
     ...........................................................................................................++++
     writing new private key to 'private/root-ca.key'
     
-    cyber% ls -al
+==> ls -al
+
     total 32
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:02 .
     drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 14 06:18 ..
@@ -211,7 +212,11 @@ Create certificate from the CSR and self sign the certificate.
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
-    cyber% ls -al
+
+
+==> ls -al
+
+
     total 40
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:04 .
     drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 14 06:18 ..
@@ -222,7 +227,11 @@ Create certificate from the CSR and self sign the certificate.
     -rw-r--r-- 1 cybersecurity cybersecurity 3056 Jun 15 11:38 root-ca.conf~
     -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 root-ca.crt
     -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:02 root-ca.csr
-    cyber% ls -al db
+
+
+==> ls -al db
+
+
     total 28
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 12:04 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:04 ..
@@ -233,12 +242,13 @@ Create certificate from the CSR and self sign the certificate.
     -rw-r--r-- 1 cybersecurity cybersecurity   33 Jun 15 12:04 serial
     -rw-r--r-- 1 cybersecurity cybersecurity   33 Jun 15 11:41 serial.old
     
-    cyber% ls -al certs
+==> ls -al certs
+
+
     total 16
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 12:04 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:04 ..
     -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 2D0FE5F0004477C3E0318DBA1807C8BB.pem
-    cyber%
 
 
 You can see the certificate has been created. You can see inside the
@@ -256,7 +266,8 @@ Look at sub-ca.conf, also in root-ca directory.
     ............................................................................................++++
     writing new private key to 'private/sub-ca.key'
     
-    cyber% ls -al private
+==> ls -al private
+
     total 16
     drwx------ 2 cybersecurity cybersecurity 4096 Jun 15 12:24 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:41 ..
@@ -347,7 +358,6 @@ Look at sub-ca.conf, also in root-ca directory.
              18:69:6d:6c:7f:99:f2:ed:32:65:37:78:10:70:f8:7a:6b:53:
              b2:78:e2:23:78:c2:b3:db:87:9e:9e:cc:21:00:c3:ce:7b:91:
              bd:99:19:ab:23:13:9f:5d
-    cyber% 
     
 ==> openssl ca -config root-ca.conf -in sub-ca.csr -out sub-ca.crt -extensions sub_ca_ext
 
@@ -448,20 +458,32 @@ Look at sub-ca.conf, also in root-ca directory.
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
-    cyber% ls -al certs
+
+==> ls -al certs
+
     total 24
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 12:48 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 ..
     -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 2D0FE5F0004477C3E0318DBA1807C8BB.pem
     -rw-r--r-- 1 cybersecurity cybersecurity 8186 Jun 15 12:48 2D0FE5F0004477C3E0318DBA1807C8BC.pem
-    cyber% cat db/index
+
+
+==> cat db/index
+
+
     V	290612063326Z		2D0FE5F0004477C3E0318DBA1807C8BB	unknown	/C=IN/O=Example/CN=Example.com
     V	290612071831Z		2D0FE5F0004477C3E0318DBA1807C8BC	unknown	/C=IN/O=Example/CN=Example SubCA
-    cyber% cat db/serial
+
+==> cat db/serial
+
     2D0FE5F0004477C3E0318DBA1807C8BD
-    cyber% cat db/serial.old 
+
+==> cat db/serial.old 
+
     2D0FE5F0004477C3E0318DBA1807C8BC
-    cyber% ls -al
+
+==> ls -al
+
     total 60
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 .
     drwxr-xr-x 4 cybersecurity cybersecurity 4096 Jun 15 12:13 ..
@@ -476,7 +498,7 @@ Look at sub-ca.conf, also in root-ca directory.
     -rw-r--r-- 1 cybersecurity cybersecurity 2944 Jun 15 12:40 sub-ca.conf~
     -rw-r--r-- 1 cybersecurity cybersecurity 8186 Jun 15 12:48 sub-ca.crt
     -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:41 sub-ca.csr
-    cyber%
+
 
 How do you distinguish between self-signed certificate and a CA issued
 certificate? The difference is in the presence of the "X509v3
@@ -500,20 +522,19 @@ CA. Instead they are managed by the user/application/customer.
     ..............................................................+++++
     .................................................................+++++
     e is 65537 (0x010001)
-    cyber%
 
 ==> openssl rsa  -pubout -out serverpubkey.key -in serverkey.key
 
     writing RSA key
     
-    cyber% ls -al
+==> ls -al
+
     total 20
     drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 15 12:58 .
     drwxr-xr-x 6 cybersecurity cybersecurity 4096 Jun 12 20:30 ..
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 root-ca
     -rw------- 1 cybersecurity cybersecurity 1679 Jun 12 20:32 serverkey.key
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun 12 20:33 serverpubkey.key
-    cyber%
 
 Create a CSR
 
@@ -1532,5 +1553,3 @@ the browser's Green Lock.
              fa:33:c2:8e:23:4e:14:7f:b4:da:a3:f6:a8:6a:c1:db:4a:40:
              a3:58:12:1c:90:36:2a:68:74:89:b0:74:a1:9c:0c:83:82:ef:
              b7:20:8f:f0
-    cyber%
-

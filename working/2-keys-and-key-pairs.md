@@ -86,12 +86,16 @@ PEM. You can store the data into a file.
     .............................................................+++++
     ...+++++
     e is 65537 (0x010001)
-    cyber% ls -al
+
+==> ls -al
+
     total 12
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  4 09:39 .
     drwxr-xr-x 4 cybersecurity cybersecurity 4096 Jun  4 09:16 ..
     -rw------- 1 cybersecurity cybersecurity 1675 Jun  4 09:39 key.pem
-    cyber% cat key.pem
+
+==> cat key.pem
+
     -----BEGIN RSA PRIVATE KEY-----
     MIIEowIBAAKCAQEAq6+k7R+C9pnwk8tXu82FCG3aMEw8piWUS+oucUUMymKOpNH+
     zEriyBj9rSNf5qPwtFepb+k4yuRCr+1zshU6BBpA9udATGlTJZXKnURuBVbPe7nW
@@ -237,7 +241,10 @@ Get text equivalent of the RSA key.
 ==> openssl rsa -in key.pem -inform pem -pubout > key.pub
 
     writing RSA key
-    cyber% cat key.pub
+
+==> cat key.pub
+
+
     -----BEGIN PUBLIC KEY-----
     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq6+k7R+C9pnwk8tXu82F
     CG3aMEw8piWUS+oucUUMymKOpNH+zEriyBj9rSNf5qPwtFepb+k4yuRCr+1zshU6
@@ -247,21 +254,23 @@ Get text equivalent of the RSA key.
     WBm6LPKbLSp75+xYHrT8WjkkrgqOJhXOGfCw17DDkAM4Zkpbuqjx1tOUmP28TWfC
     YQIDAQAB
     -----END PUBLIC KEY-----
-    cyber%
 
 
 ##	Generate ECC key pair
 
 ==> openssl ecparam -name prime256v1 -genkey -noout -out eckey.pem
 
-    cyber% ls -al
+==>  ls -al
+
     total 20
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  4 10:04 .
     drwxr-xr-x 4 cybersecurity cybersecurity 4096 Jun  4 09:16 ..
     -rw------- 1 cybersecurity cybersecurity  227 Jun  4 10:04 eckey.pem
     -rw------- 1 cybersecurity cybersecurity 1675 Jun  4 09:39 key.pem
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  4 10:02 key.pub
-    cyber% cat eckey.pem
+
+==> cat eckey.pem
+
     -----BEGIN EC PRIVATE KEY-----
     MHcCAQEEIIb7hLwl5YPa/+j0IltBXEA1a9O/NgUtc6UeoD7tlEuKoAoGCCqGSM49
     AwEHoUQDQgAEB3Z84qs6VIVKiUcaiEMaL+PtZSFkVfwY7qpO42uNvbfrG4nTE/nK
@@ -272,7 +281,9 @@ Get text equivalent of the RSA key.
 
     read EC key
     writing EC key
-    cyber% cat eckey.pub
+
+==> cat eckey.pub
+
     -----BEGIN PUBLIC KEY-----
     MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEB3Z84qs6VIVKiUcaiEMaL+PtZSFk
     VfwY7qpO42uNvbfrG4nTE/nKQoNBtSDWHrdzYD7ZkPN9fPULdVBvwQ4t2w==
@@ -297,7 +308,8 @@ and run as binary code.
 ##	Sign and verify using keys
 ### Sign
 
-    cyber% cat textfile
+==> cat textfile
+
     This is a test file"
 
 ==> openssl dgst -sha256 textfile
@@ -306,7 +318,7 @@ and run as binary code.
 
 ==> openssl dgst -sha256 -sign key.pem textfile
 
-    �ͮ���ijG4�[���%                                                                                                                                                                                                     cyber%
+    �ͮ���ijG4�[���%                                                                                                                                                                                      
 
 ==> openssl dgst -sha256 -sign key.pem -out textfile.sha256.sign textfile
 
@@ -317,26 +329,28 @@ This creates a file with the signature, named textfile.sha256.
 ==> openssl dgst -sha256 -verify key.pub -signature textfile.sha256.sign textfile
 
     Verified OK
-    cyber%
 
 ### Verify Bad File
 
-    cyber% cp textfile textfile.bad
-    cyber% echo "xx" >> textfile.bad
-    cyber% cat textfile.bad
+==> cp textfile textfile.bad
+==> echo "xx" >> textfile.bad
+==> cat textfile.bad
+
     This is a test file"
     xx
-    cyber% cat textfile
+
+==> cat textfile
+
     This is a test file"
-    cyber% 
-    
-    ==> openssl dgst -sha256 -verify key.pub -signature textfile.sha256.sign textfile.bad
+
+ ==> openssl dgst -sha256 -verify key.pub -signature textfile.sha256.sign textfile.bad
+
     Verification Failure
-    cyber%
 
 Signature is a binary. Convert to text format for easy transportation.
 
-    cyber% base64 textfile.sha256.sign 
+==> base64 textfile.sha256.sign 
+
     UuTfZRlswom7eG6qB8o5zUiBg5DyURdqAW/lAUMQjnk0Eubuf1ZOdvA+j6g7qf1JLzFJ1H906VRX
     jmN+LiSUvKrv3W/kwQBVsDw1+I0gXSK3J3IOH2yG9KkAzE/0SoQNc8fDwrmU68NVB78Bwdil8e44
     Jv5qO0215wGEB02VDnAP4tfpmmD6iBzUGdJdzxUPifHEOr9ngsWeMOsScPwJQFHV6c2IAMdYWrQi
@@ -345,7 +359,8 @@ Signature is a binary. Convert to text format for easy transportation.
 
 Hexdump of signature
 
-    cyber% hexdump textfile.sha256.sign 
+==> hexdump textfile.sha256.sign 
+
     0000000 e452 65df 6c19 89c2 78bb aa6e ca07 cd39
     0000010 8148 9083 51f2 6a17 6f01 01e5 1043 798e
     0000020 1234 eee6 567f 764e 3ef0 a88f a93b 49fd
@@ -363,7 +378,6 @@ Hexdump of signature
     00000e0 a2c2 fa69 3cb6 e333 1d06 5b78 7e80 0d67
     00000f0 cd89 94ae e085 1969 476a f034 f45b cdf2
     0000100
-    cyber%
 
 ##	Encrypt and Decrypt using keys
 
@@ -375,7 +389,8 @@ decrypt data.
 
 ==> openssl rsautl -in textfile -out textfile.enc -pubin -inkey key.pub -encrypt
 
-    cyber% ls -al
+==> ls -al
+
     total 40
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  4 10:46 .
     drwxr-xr-x 4 cybersecurity cybersecurity 4096 Jun  4 09:16 ..
@@ -387,24 +402,24 @@ decrypt data.
     -rw-r--r-- 1 cybersecurity cybersecurity   24 Jun  4 10:25 textfile.bad
     -rw-r--r-- 1 cybersecurity cybersecurity  256 Jun  4 10:46 textfile.enc
     -rw-r--r-- 1 cybersecurity cybersecurity  256 Jun  4 10:15 textfile.sha256.sign
-    cyber% cat textfile.enc
+
+==> cat textfile.enc
+
     ��DG��v��Hg�i^8�y
     �Ht���#P����щ��r�3��w1[��?�V �El[q���4�+&��Y@�gd�.�ɶ�h�Q�6�<��
                                                                   ��	��\��~�b<��\b��*�3�%J�s�qj��&�(�ʋ:�GX��R
                                                                                                                     )@p����8�A��TW	��o��ږ�I���aT<$L@��}���,qM�2N�����%��/8��%UT��!�f��&
-    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                                   cyber% base64 textfile.enc 
+    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                    ==> base64 textfile.enc 
+
     p3sI4ZIDREcPi7J2i75IZ75pXjjzgHkKjwVIdKmcvSNQ4K7YzdXRianOcvKXM62RdzEYW4GoP59W
     IM1FbFtxzOHjNJArJgEPlhfKWUCHZ2QcrhEu7Mm272iUUcsHNpA8/4ALnqgHCfodgFyt534DimI8
     l69cG0dirgXsEyr1M6MlSgDkkHO2E3FqxsgmuxQo4YrKizqRFUdYjB3VUgwpQHC3h9YW4ziJQcPl
     VFcfCY23b/n/2pb4ScjH5GFUPCRMQPYWhn2Lgf4scU3oMk7n4JuM6wgTsiWiuy84mbwlVVSmmBIh
     l2bOxCYKgOyXaddiPoPUnh3UjtyGlhvP6iMm/g==
-    cyber%
 
 ### Decryption
 
 ==> openssl rsautl -in textfile.enc -inkey key.pem -decrypt        
 
     This is a test file"
-    cyber%
-
 

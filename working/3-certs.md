@@ -25,24 +25,25 @@ a password if you would like to.
     ...+++++
     ....+++++
     e is 65537 (0x010001)
-    cyber% ls -al
+
+==> ls -al
+
     total 12
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  7 11:31 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
     -rw------- 1 cybersecurity cybersecurity 1675 Jun  7 11:31 certkey.key
-    cyber%
-
 
 ==> openssl rsa -pubout -out certpubkey.key -in certkey.key
 
     writing RSA key
-    cyber% ls -al
+
+==> ls -al
+
     total 16
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  7 11:32 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
     -rw------- 1 cybersecurity cybersecurity 1675 Jun  7 11:31 certkey.key
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  7 11:32 certpubkey.key
-    cyber%
 
 ##	Create CSR
 
@@ -66,14 +67,15 @@ a password if you would like to.
     to be sent with your certificate request
     A challenge password []:
     An optional company name []:
-    cyber% ls -al
+
+==> ls -al
+
     total 20
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  7 11:38 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
     -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jun  7 11:38 cert.csr
     -rw------- 1 cybersecurity cybersecurity 1675 Jun  7 11:31 certkey.key
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  7 11:32 certpubkey.key
-    cyber%
 
 
 ==> openssl req -in cert.csr -noout -text
@@ -123,7 +125,7 @@ a password if you would like to.
              9e:aa:5f:02:fe:34:e1:7d:98:12:8d:7e:52:58:c9:d0:d6:3e:
              51:47:85:a1:06:3e:a4:4c:f1:30:38:bd:d1:39:1f:39:c2:32:
              1d:39:20:b3
-    cyber%
+
 
 The CSR is signed with the private key and contains the public
 key. Signing with the private key shows proof of possession of the
@@ -153,7 +155,8 @@ Create a config file that has the information requested in the CSR
 request generation and pass that config file to the openssl.
 
 
-    cyber% cat csr.cnf
+==> cat csr.cnf
+
     [req]
     prompt = no 
     distinguished_name = dn 
@@ -165,12 +168,12 @@ request generation and pass that config file to the openssl.
     L = Chennai
     C = IN
     ST = Tamil Nadu
-    cyber%
 
 
 ==> openssl req -new -config csr.cnf -key certkey.key -out certwithconf.csr
 
-    cyber% ls -al
+==> ls -al
+
     total 28
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  7 12:36 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
@@ -179,7 +182,6 @@ request generation and pass that config file to the openssl.
     -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun  7 11:32 certpubkey.key
     -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jun  7 12:40 certwithconf.csr
     -rw-r--r-- 1 cybersecurity cybersecurity  191 Jun  7 12:36 csr.cnf
-    cyber%
 
 Question: There is a difference in SubjectName between cert.csr and certwithconf.csr. Identify it.
 
@@ -209,7 +211,9 @@ in terms of “Not Valid Before” and “Not Valid After”.
     subject=C = IN, ST = Tamil Nadu, L = Chennai, O = My Cool Company Ltd, OU = Finance, CN = www.coolcompany.example, emailAddress = admin@coolcompany.example
     Getting Private key
 
-    cyber% ls -al
+==> ls -al
+
+
     total 32
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun  8 20:56 .
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun  7 11:26 ..
@@ -220,7 +224,10 @@ in terms of “Not Valid Before” and “Not Valid After”.
     -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jun  7 12:40 certwithconf.csr
     -rw-r--r-- 1 cybersecurity cybersecurity  191 Jun  7 12:36 csr.cnf
 
-    cyber% cat cert.crt
+
+==> cat cert.crt
+
+
     -----BEGIN CERTIFICATE-----
     MIID6TCCAtECFBd6XHDLuc9Yh6StlgbJH6F6yUXfMA0GCSqGSIb3DQEBCwUAMIGw
     MQswCQYDVQQGEwJJTjETMBEGA1UECAwKVGFtaWwgTmFkdTEQMA4GA1UEBwwHQ2hl
@@ -297,7 +304,6 @@ in terms of “Not Valid Before” and “Not Valid After”.
              7d:6a:30:0e:3b:ab:2e:63:30:59:1a:98:98:cb:a2:04:04:1e:
              ca:21:15:4e:75:4d:5e:50:4e:f1:31:81:f3:4d:f9:af:9a:d4:
              29:35:66:43
-    cyber%
 
 Question: Identify the difference between CSR and Certificate.
 
@@ -312,13 +318,15 @@ other extensions possible, such as what the key can be used for.
 When creating the certificate, you can create an extensions file and
 use that as part of the certificate creation.
 
-    cyber% cat > cert.ext
+==> cat > cert.ext
+
     subjectAltName = DNS:*.coolcompany.example, DNS:coolcompany.example
-    cyber%  openssl x509 -req -days 365 -in cert.csr -signkey certkey.key -out certext.crt -extfile cert.ext
+
+==>  openssl x509 -req -days 365 -in cert.csr -signkey certkey.key -out certext.crt -extfile cert.ext
     Signature ok
     subject=C = IN, ST = Tamil Nadu, L = Chennai, O = My Cool Company Ltd, OU = Finance, CN = www.coolcompany.example, emailAddress = admin@coolcompany.example
     Getting Private key
-    cyber%
+
 
  TBD: not working
 
