@@ -539,6 +539,7 @@ CA. Instead they are managed by the user/application/customer.
 Create a CSR
 
 ==> openssl req -new -config server-coolcompany.conf -key serverkey.key -out server-coolcompany.csr
+
 ==> openssl req -in server-coolcompany.csr -noout -text
 
 
@@ -591,6 +592,7 @@ Create a CSR
 Get Server certificate issued by the SubCA.
 
 ==> cd root-ca
+
 ==> openssl ca -config sub-ca.conf -in ../server-coolcompany.csr -out ../server-coolcompany.crt -extensions server_ext 
 
     Using configuration from sub-ca.conf
@@ -603,6 +605,7 @@ Config file prevents us from issuing arbitrary certificates.
 Re-create the CSR.
 
 ==> openssl req -new -config server-example.conf -key serverkey.key -out server-example.csr
+
 ==> ls -al
 
     total 36
@@ -667,6 +670,7 @@ Re-create the CSR.
 Now switch to the CA and issue the certificate
 
 ==> cd root-ca
+
 ==> openssl ca -config sub-ca.conf -in ../server-example.csr -out ../server-example.crt -extensions server_ext
 
     Using configuration from sub-ca.conf
@@ -860,6 +864,7 @@ Look at the certificate and verify everything looks good.
 ##	Create Client Certificate
 
 ==> cd cert-hier
+
 ==> openssl genrsa -out clientkey.key 4096
 
 
@@ -871,11 +876,13 @@ Look at the certificate and verify everything looks good.
 
 
 ==> openssl req -new -config client-example.conf -key clientkey.key -out client-example.csr
+
 ==> openssl req -in client-example.csr -noout -text
 
 SubCA has to issue certificate
 
 ==> cd root-ca
+
 ==> openssl ca -config sub-ca.conf -in ../client.csr -out ../client.crt -extensions client_ext
 
     Using configuration from sub-ca.conf
@@ -985,6 +992,7 @@ SubCA has to issue certificate
 ## Verify client and server certificates
 
 ==> cd cert-hier
+
 ==> ls -al
 
     total 64
@@ -1024,6 +1032,7 @@ We create a trust store by concatenating all the certificates in the
 chain into a single file.
 
 ==> cat root-ca/root-ca.crt root-ca/sub-ca.crt > ca-chain.crt
+
 ==> cat ca-chain.crt | grep Subject
 
     Subject: C=IN, O=Example, CN=Example.com

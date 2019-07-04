@@ -47,7 +47,8 @@ a password if you would like to.
 
 ##	Create CSR
 
-    ==> openssl req -new -key certkey.key -out cert.csr
+==> openssl req -new -key certkey.key -out cert.csr
+
     You are about to be asked to enter information that will be incorporated
     into your certificate request.
     What you are about to enter is what is called a Distinguished Name or a DN.
@@ -323,6 +324,7 @@ use that as part of the certificate creation.
     subjectAltName = DNS:*.coolcompany.example, DNS:coolcompany.example
 
 ==>  openssl x509 -req -days 365 -in cert.csr -signkey certkey.key -out certext.crt -extfile cert.ext
+
     Signature ok
     subject=C = IN, ST = Tamil Nadu, L = Chennai, O = My Cool Company Ltd, OU = Finance, CN = www.coolcompany.example, emailAddress = admin@coolcompany.example
     Getting Private key
