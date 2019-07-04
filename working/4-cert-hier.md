@@ -7,26 +7,30 @@ Requires a set of configuration in OpenSSL.
 
 Directory Structure
 
-    $ mkdir root-ca
-    $ cd root-ca
-    $ mkdir certs db private
-    $ chmod 700 private
-    $ touch db/index
-    $ openssl rand -hex 16  > db/serial
-    $ echo 1001 > db/crlnumber
+	cd cert-hier
+    mkdir root-ca
+    cd root-ca
+    mkdir certs db private
+    chmod 700 private
+    touch db/index
+    openssl rand -hex 16  > db/serial
+    echo 1001 > db/crlnumber
 
-* Certs: location where all issued certificates are stored.
+* Certs: location where all issued certificates are stored. Each file
+  here is a certificate
 * Db: contains database information.
-* Db/index: has the index of all issued ceertificates
-* Db/serial: serial number of issued certificates. Start with a random number and then the serial number monotonically increases
-* Db/crlnumber: Certificate Revocation List
+* Db/index: has the index of all issued certificates.
+* Db/serial: serial number of issued certificates. Start with a random
+  number and then the serial number monotonically increases
+* Db/crlnumber: Certificate Revocation List numbers
 * Private: Contains all the private keys and must be protected
 
 Config file: in cert-hier/root-ca directory
 
-Create root key and CSR request
+Create root key and CSR request. Take a look at root-ca.conf for
+configuration details.
 
-==> openssl req -new -config root-ca.conf -out root-ca.csr -keyout private/root-ca.key           
+==> openssl req -new -config root-ca.conf -out root-ca.csr -keyout private/root-ca.key
 
     Generating a RSA private key
     .............................................................................................................................................................++++
@@ -41,10 +45,10 @@ Create root key and CSR request
     drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 11:41 db
     drwx------ 2 cybersecurity cybersecurity 4096 Jun 15 11:51 private
     -rw-r--r-- 1 cybersecurity cybersecurity 2262 Jun 15 12:02 root-ca.conf
-    -rw-r--r-- 1 cybersecurity cybersecurity 3056 Jun 15 11:38 root-ca.conf~
     -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:02 root-ca.csr
 
-==> openssl req -noout -text -in root-ca.csr                                          
+==> openssl req -noout -text -in root-ca.csr
+Look at "requested extensions"
 
     Certificate Request:
         Data:
@@ -237,9 +241,13 @@ Create certificate from the CSR and self sign the certificate.
     cyber%
 
 
+You can see the certificate has been created. You can see inside the
+certificate using openssl.
 
 
 ##	Create Sub-CA
+
+Look at sub-ca.conf, also in root-ca directory.
 
 ==> openssl req -new -config sub-ca.conf -out sub-ca.csr -keyout private/sub-ca.key
 
@@ -255,7 +263,8 @@ Create certificate from the CSR and self sign the certificate.
     -rw------- 1 cybersecurity cybersecurity 3272 Jun 15 12:02 root-ca.key
     -rw------- 1 cybersecurity cybersecurity 3272 Jun 15 12:41 sub-ca.key
     
-    ==> openssl req -noout -text -in sub-ca.csr                                               
+==>  openssl req -noout -text -in sub-ca.csr
+
     Certificate Request:
         Data:
             Version: 1 (0x0)
@@ -340,7 +349,9 @@ Create certificate from the CSR and self sign the certificate.
              bd:99:19:ab:23:13:9f:5d
     cyber% 
     
-    cyber%  openssl ca -config root-ca.conf -in sub-ca.csr -out sub-ca.crt -extensions sub_ca_ext
+==> openssl ca -config root-ca.conf -in sub-ca.csr -out sub-ca.crt -extensions sub_ca_ext
+
+
     Using configuration from root-ca.conf
     Check that the request matches the signature
     Signature ok
@@ -467,7 +478,22 @@ Create certificate from the CSR and self sign the certificate.
     -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:41 sub-ca.csr
     cyber%
 
+How do you distinguish between self-signed certificate and a CA issued
+certificate? The difference is in the presence of the "X509v3
+Authority Key Identifier" extension. Its value will be different from
+the value of the "X509v3 Subject Key Identifier" extension. If they
+are the same or if the "Authority Key Identifier" extension is not
+present, then it is a self-signed certificate.
+
+
 ##	Create server certificates
+
+We will now create certificates for server and client. We will not do
+this in the root-ca folder since they are not managed by the
+CA. Instead they are managed by the user/application/customer.
+
+    cd cert-hier
+	
 ==> openssl genrsa -out serverkey.key
 
     Generating RSA private key, 2048 bit long modulus (2 primes)
@@ -491,177 +517,136 @@ Create certificate from the CSR and self sign the certificate.
 
 Create a CSR
 
-==> openssl req -new -key serverkey.key -out server.csr
+==> openssl req -new -config server-coolcompany.conf -key serverkey.key -out server-coolcompany.csr
+==> openssl req -in server-coolcompany.csr -noout -text
 
-    You are about to be asked to enter information that will be incorporated
-    into your certificate request.
-    What you are about to enter is what is called a Distinguished Name or a DN.
-    There are quite a few fields but you can leave some blank
-    For some fields there will be a default value,
-    If you enter '.', the field will be left blank.
-    -----
-    Country Name (2 letter code) [AU]:IN
-    State or Province Name (full name) [Some-State]:Tamil Nadu
-    Locality Name (eg, city) []:Chennai
-    Organization Name (eg, company) [Internet Widgits Pty Ltd]:Cool Company Ltd
-    Organizational Unit Name (eg, section) []:Engineering
-    Common Name (e.g. server FQDN or YOUR name) []:Cool Company
-    Email Address []:admin@example.com
-    
-    Please enter the following 'extra' attributes
-    to be sent with your certificate request
-    A challenge password []:
-    An optional company name []:
-    cyber% ls -al
-    total 24
-    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 15 13:05 .
-    drwxr-xr-x 6 cybersecurity cybersecurity 4096 Jun 12 20:30 ..
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 root-ca
-    -rw-r--r-- 1 cybersecurity cybersecurity 1078 Jun 15 13:05 server.csr
-    -rw------- 1 cybersecurity cybersecurity 1679 Jun 12 20:32 serverkey.key
-    -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun 12 20:33 serverpubkey.key
-
-==> openssl req -noout -text -in server.csr
 
     Certificate Request:
         Data:
             Version: 1 (0x0)
-            Subject: C = IN, ST = Tamil Nadu, L = Chennai, O = Cool Company Ltd, OU = Engineering, CN = Cool Company, emailAddress = admin@example.com
+            Subject: CN = www.coolcompany.example, emailAddress = admin@coolcompany.example, O = My Cool Company Ltd, OU = Finance, L = Chennai, C = IN, ST = Tamil Nadu
             Subject Public Key Info:
                 Public Key Algorithm: rsaEncryption
                     RSA Public-Key: (2048 bit)
                     Modulus:
-                        00:bb:77:7f:6b:a3:1d:d4:4c:18:f0:69:c6:3a:bd:
-                        ae:fe:9e:22:85:47:a7:8e:31:d7:40:d2:81:eb:83:
-                        0d:01:54:8f:ad:5b:0e:39:5b:8c:7e:63:c3:c3:76:
-                        1f:b6:d7:49:1c:1e:e9:3a:54:43:95:e0:7c:4e:28:
-                        03:77:a1:b6:9f:a2:af:9e:34:b8:fe:27:05:ac:3c:
-                        dd:bd:8e:ac:2e:d5:a4:69:3a:62:25:b2:89:c5:c2:
-                        44:46:09:b1:11:4e:db:51:f9:70:e7:31:cd:9d:41:
-                        c7:a8:ca:9a:16:bc:66:79:9b:fc:8b:0a:c9:65:12:
-                        ff:11:25:87:c1:c4:fb:ec:34:96:3e:77:1b:40:69:
-                        52:c1:64:77:b9:61:cc:fe:cb:3f:87:1c:17:4c:12:
-                        fb:9e:3f:69:aa:87:7b:41:da:7e:47:24:11:a9:0e:
-                        a1:e9:ff:ce:5e:b1:e4:ee:4b:7a:b5:e2:84:87:aa:
-                        ec:88:d9:cb:d1:8f:94:38:97:da:36:05:c4:cf:b4:
-                        a6:22:36:84:3c:ac:04:c4:67:21:5b:ca:a9:b5:48:
-                        ff:bc:05:c5:48:0a:06:17:b2:d4:1f:e8:58:1f:1b:
-                        03:d3:0e:e3:1d:69:78:b8:3f:27:49:a3:5b:0c:5a:
-                        4e:02:fc:36:f6:14:2b:53:14:d7:4b:cc:d4:ed:1d:
-                        ac:bd
+                        00:a5:8b:ec:35:4c:fb:5c:46:9f:4e:a5:be:7b:32:
+                        c4:17:a0:d3:09:88:01:5e:36:04:f1:7d:c1:98:31:
+                        35:ea:62:ad:22:4a:5d:19:bd:0f:0f:f0:3a:f5:ca:
+                        66:ee:b0:a1:85:4f:af:b7:3a:d7:9d:60:5f:cd:b6:
+                        5f:fd:0f:db:94:5b:02:4f:e4:ad:b6:25:0d:25:bb:
+                        ce:55:86:27:2b:3e:57:df:72:1a:79:04:29:b5:dc:
+                        a5:23:5a:ff:48:72:a4:88:fb:fb:d3:f1:5c:1a:c4:
+                        05:e6:e0:b9:56:0e:c8:91:8e:fb:66:9d:68:67:e5:
+                        ca:ae:45:4c:e4:6b:05:6f:68:eb:6b:0c:05:d4:de:
+                        7b:40:f9:27:30:94:0f:ab:41:75:d1:38:9e:9c:04:
+                        49:b1:9c:47:97:e6:70:ae:35:7a:e1:79:12:bd:50:
+                        71:53:73:49:51:af:c0:73:f7:21:e8:75:a3:99:49:
+                        b7:0d:7f:df:4b:64:a0:4c:5c:a3:6a:dc:1f:17:6c:
+                        dd:00:a9:05:2e:7d:db:fc:ab:5a:65:17:e0:75:5f:
+                        77:b2:70:aa:97:be:02:6f:10:44:29:e3:31:b5:4b:
+                        b7:94:da:ba:23:75:4d:0c:b9:78:77:0e:65:aa:65:
+                        8a:a5:c1:11:5c:6e:1e:96:27:22:20:20:15:de:96:
+                        a5:c3
                     Exponent: 65537 (0x10001)
             Attributes:
                 a0:00
         Signature Algorithm: sha256WithRSAEncryption
-             b2:e6:9e:ea:7f:6a:ed:da:7b:12:9c:b8:2e:96:3a:cc:ad:57:
-             bb:7a:f4:cc:bf:ec:fc:86:d7:3e:23:15:7e:9c:e0:18:1a:fc:
-             22:b8:5e:7f:37:96:52:cb:14:3d:12:db:f4:5f:d7:5a:d7:ec:
-             24:09:59:ee:53:14:da:96:a9:91:60:6b:ce:d7:61:60:02:b7:
-             98:3b:f3:62:2e:93:9f:c9:18:45:41:bf:45:1e:7e:cb:00:b4:
-             f3:6e:be:15:bd:09:f0:ea:03:35:1a:ad:1d:17:ed:20:9e:72:
-             11:2f:02:01:60:3b:7b:be:aa:17:ff:6b:57:b7:76:91:a2:ae:
-             7b:a9:52:8e:60:4c:65:e8:5c:8d:4e:98:0c:f1:0a:6c:0b:88:
-             8a:f8:e0:3e:88:16:c8:9c:8a:15:3e:e0:6a:9b:4c:3c:eb:19:
-             3d:3a:d5:26:59:a6:90:c0:05:52:ed:22:78:d8:20:2c:46:c2:
-             24:c4:bb:e4:17:e3:70:20:71:2d:33:d2:8a:61:91:c3:26:0a:
-             a9:ba:1a:43:5b:4b:a8:4b:4f:1f:01:d2:0f:9e:90:17:b8:a5:
-             31:7e:81:74:42:0b:57:3e:eb:14:65:97:54:0b:23:ef:13:0e:
-             1e:cc:79:fe:f2:45:64:82:9e:be:bc:2e:51:c8:b9:b1:cf:e0:
-             1f:45:89:9f
-    cyber%
-
+             6d:ee:a9:49:0c:f5:4f:cb:18:b3:2a:5f:fe:e2:ae:14:d1:68:
+             d8:20:d4:c5:72:a4:54:d4:a6:34:c7:1a:b4:8f:45:55:29:96:
+             3c:33:42:ac:68:3d:cc:4c:83:c8:06:79:d1:91:37:0f:1f:38:
+             df:61:8f:0f:41:36:a3:9c:bb:35:40:f7:e0:70:1f:e4:7a:84:
+             e7:f1:c7:1f:19:da:14:4e:12:09:d2:90:47:3a:82:7b:ac:48:
+             72:c4:95:d9:a5:b8:cf:2c:5e:fa:db:a6:dc:a4:41:20:92:8c:
+             4c:c7:c9:7d:f3:1b:28:10:7e:0b:85:18:5a:12:36:e3:1b:1a:
+             b4:a7:a2:b6:d2:42:17:d8:fe:91:46:57:76:6f:f0:c2:5a:19:
+             86:e0:31:15:e7:73:16:30:9e:a8:72:bc:c6:a2:6c:10:c4:76:
+             64:26:25:38:dc:e8:48:92:c1:3f:10:9d:d9:cd:da:25:66:45:
+             37:e1:58:57:0b:05:aa:9f:80:a8:a1:a7:58:e8:9f:ef:d4:9d:
+             12:09:47:95:eb:8a:32:38:07:07:23:0a:90:24:a6:55:87:0d:
+             4d:46:d5:f0:db:7b:c2:f1:17:24:43:1c:ba:38:35:5a:2e:18:
+             95:81:90:68:3c:85:cc:6b:dd:1d:ea:65:d9:2b:7f:d0:0e:5f:
+             6a:33:04:a8
 
 Get Server certificate issued by the SubCA.
 
-
-==> openssl ca -config sub-ca.conf -in ../server.csr -out ../server.crt -extensions server_ext 
+==> cd root-ca
+==> openssl ca -config sub-ca.conf -in ../server-coolcompany.csr -out ../server-coolcompany.crt -extensions server_ext 
 
     Using configuration from sub-ca.conf
     Check that the request matches the signature
     Signature ok
     The organizationName field is different between
-    CA certificate (Example) and the request (Cool Company Ltd)
-    cyber%
+    CA certificate (Example) and the request (My Cool Company Ltd)
 
 Config file prevents us from issuing arbitrary certificates.
 Re-create the CSR.
 
-==> openssl req -new -key serverkey.key -out server.csr                                
+==> openssl req -new -config server-example.conf -key serverkey.key -out server-example.csr
+==> ls -al
 
-    You are about to be asked to enter information that will be incorporated
-    into your certificate request.
-    What you are about to enter is what is called a Distinguished Name or a DN.
-    There are quite a few fields but you can leave some blank
-    For some fields there will be a default value,
-    If you enter '.', the field will be left blank.
-    -----
-    Country Name (2 letter code) [AU]:IN
-    State or Province Name (full name) [Some-State]:Tamil Nadu
-    Locality Name (eg, city) []:Chennai
-    Organization Name (eg, company) [Internet Widgits Pty Ltd]:Example
-    Organizational Unit Name (eg, section) []:Engineering
-    Common Name (e.g. server FQDN or YOUR name) []:127.0.0.1        
-    Email Address []:admin@example.com
-    
-    Please enter the following 'extra' attributes
-    to be sent with your certificate request
-    A challenge password []:
-    An optional company name []:
+    total 36
+    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jul  4 22:00 .
+    drwxr-xr-x 8 cybersecurity cybersecurity 4096 Jul  4 21:07 ..
+    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jul  4 21:32 root-ca
+    -rw-r--r-- 1 cybersecurity cybersecurity  191 Jul  4 21:50 server-coolcompany.conf
+    -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jul  4 21:52 server-coolcompany.csr
+    -rw-r--r-- 1 cybersecurity cybersecurity  165 Jul  4 21:58 server-example.conf
+    -rw-r--r-- 1 cybersecurity cybersecurity 1070 Jul  4 22:00 server-example.csr
+    -rw------- 1 cybersecurity cybersecurity 1679 Jul  4 21:48 serverkey.key
+    -rw-r--r-- 1 cybersecurity cybersecurity  451 Jul  4 21:48 serverpubkey.key
 
-==> openssl req -noout -text -in server.csr            
+==> openssl req -in server-example.csr -noout -text
 
     Certificate Request:
         Data:
             Version: 1 (0x0)
-            Subject: C = IN, ST = Tamil Nadu, L = Chennai, O = Example, OU = Engineering, CN = 127.0.0.1, emailAddress = admin@example.com
+            Subject: CN = 127.0.0.1, emailAddress = admin@coolcompany.example, O = Example, OU = Finance, L = Chennai, C = IN, ST = Tamil Nadu
             Subject Public Key Info:
                 Public Key Algorithm: rsaEncryption
                     RSA Public-Key: (2048 bit)
                     Modulus:
-                        00:bb:77:7f:6b:a3:1d:d4:4c:18:f0:69:c6:3a:bd:
-                        ae:fe:9e:22:85:47:a7:8e:31:d7:40:d2:81:eb:83:
-                        0d:01:54:8f:ad:5b:0e:39:5b:8c:7e:63:c3:c3:76:
-                        1f:b6:d7:49:1c:1e:e9:3a:54:43:95:e0:7c:4e:28:
-                        03:77:a1:b6:9f:a2:af:9e:34:b8:fe:27:05:ac:3c:
-                        dd:bd:8e:ac:2e:d5:a4:69:3a:62:25:b2:89:c5:c2:
-                        44:46:09:b1:11:4e:db:51:f9:70:e7:31:cd:9d:41:
-                        c7:a8:ca:9a:16:bc:66:79:9b:fc:8b:0a:c9:65:12:
-                        ff:11:25:87:c1:c4:fb:ec:34:96:3e:77:1b:40:69:
-                        52:c1:64:77:b9:61:cc:fe:cb:3f:87:1c:17:4c:12:
-                        fb:9e:3f:69:aa:87:7b:41:da:7e:47:24:11:a9:0e:
-                        a1:e9:ff:ce:5e:b1:e4:ee:4b:7a:b5:e2:84:87:aa:
-                        ec:88:d9:cb:d1:8f:94:38:97:da:36:05:c4:cf:b4:
-                        a6:22:36:84:3c:ac:04:c4:67:21:5b:ca:a9:b5:48:
-                        ff:bc:05:c5:48:0a:06:17:b2:d4:1f:e8:58:1f:1b:
-                        03:d3:0e:e3:1d:69:78:b8:3f:27:49:a3:5b:0c:5a:
-                        4e:02:fc:36:f6:14:2b:53:14:d7:4b:cc:d4:ed:1d:
-                        ac:bd
+                        00:a5:8b:ec:35:4c:fb:5c:46:9f:4e:a5:be:7b:32:
+                        c4:17:a0:d3:09:88:01:5e:36:04:f1:7d:c1:98:31:
+                        35:ea:62:ad:22:4a:5d:19:bd:0f:0f:f0:3a:f5:ca:
+                        66:ee:b0:a1:85:4f:af:b7:3a:d7:9d:60:5f:cd:b6:
+                        5f:fd:0f:db:94:5b:02:4f:e4:ad:b6:25:0d:25:bb:
+                        ce:55:86:27:2b:3e:57:df:72:1a:79:04:29:b5:dc:
+                        a5:23:5a:ff:48:72:a4:88:fb:fb:d3:f1:5c:1a:c4:
+                        05:e6:e0:b9:56:0e:c8:91:8e:fb:66:9d:68:67:e5:
+                        ca:ae:45:4c:e4:6b:05:6f:68:eb:6b:0c:05:d4:de:
+                        7b:40:f9:27:30:94:0f:ab:41:75:d1:38:9e:9c:04:
+                        49:b1:9c:47:97:e6:70:ae:35:7a:e1:79:12:bd:50:
+                        71:53:73:49:51:af:c0:73:f7:21:e8:75:a3:99:49:
+                        b7:0d:7f:df:4b:64:a0:4c:5c:a3:6a:dc:1f:17:6c:
+                        dd:00:a9:05:2e:7d:db:fc:ab:5a:65:17:e0:75:5f:
+                        77:b2:70:aa:97:be:02:6f:10:44:29:e3:31:b5:4b:
+                        b7:94:da:ba:23:75:4d:0c:b9:78:77:0e:65:aa:65:
+                        8a:a5:c1:11:5c:6e:1e:96:27:22:20:20:15:de:96:
+                        a5:c3
                     Exponent: 65537 (0x10001)
             Attributes:
                 a0:00
         Signature Algorithm: sha256WithRSAEncryption
-             54:a3:6d:80:ae:63:9a:b7:a7:5a:f3:d7:c9:70:d9:36:f0:ae:
-             b0:be:59:4c:7c:c2:44:8d:ac:da:1c:56:92:c0:01:73:77:83:
-             38:b7:3b:09:c4:2c:c8:b1:1d:73:2c:57:ba:34:21:5a:84:5c:
-             81:df:b3:08:7b:9e:3f:40:aa:fc:f5:62:96:7f:84:8e:fe:29:
-             37:97:06:bc:7b:f4:80:00:99:e2:20:46:44:74:9c:ea:d1:56:
-             8d:be:50:df:c2:d2:e3:80:31:c2:66:ea:1d:fb:da:83:03:b8:
-             24:d2:3c:ec:3c:72:78:ac:01:ff:2f:a8:90:a9:75:e4:a5:ec:
-             0b:e3:2a:bf:3b:b2:9a:48:a5:01:42:0b:33:5e:e9:2c:9c:96:
-             91:c8:8e:ce:47:3a:5f:65:24:32:93:a8:b3:5f:2f:39:0e:8c:
-             5d:00:40:66:08:ab:08:97:8c:9d:04:c9:2a:b1:c6:e5:30:bc:
-             a7:8a:22:2c:ee:1b:1e:4f:9d:1a:52:f7:92:ab:ce:cb:d5:b3:
-             50:f3:a5:5c:59:ff:60:79:46:5f:39:c9:6e:44:8f:7c:af:df:
-             b9:de:fc:98:30:3d:a3:27:3f:f7:01:84:90:89:d6:84:a5:c0:
-             24:4c:e5:61:4e:99:2a:32:06:d8:e9:91:70:f7:ba:b1:23:de:
-             22:57:a7:26
+             75:32:3c:51:e8:00:fe:a4:5b:99:7a:08:4e:c8:f3:6b:45:7b:
+             78:e4:cb:fa:0a:fd:55:ae:9e:5c:74:e8:17:47:22:e9:bb:be:
+             4a:18:a3:10:fc:aa:86:09:81:1f:36:cf:86:db:40:21:ec:74:
+             7f:63:cb:e1:a6:0d:c4:f1:14:20:60:62:c7:89:f8:e4:85:f4:
+             b6:b7:c3:10:76:1b:ad:d4:98:df:31:ed:21:31:70:12:b8:54:
+             ab:20:c2:81:af:d5:6f:bf:4e:2a:6a:86:7d:a1:86:8d:37:63:
+             f2:bd:f7:bc:ac:0a:39:31:57:ac:f6:c5:22:f1:7e:e2:20:17:
+             b2:92:cd:a4:97:32:aa:62:58:0d:82:9b:b9:b1:1e:2c:5d:ce:
+             5e:66:48:f7:c0:0d:a6:84:4e:06:ab:33:5c:88:53:8f:40:5e:
+             7d:47:46:7d:db:1c:d0:5a:87:6c:46:89:87:7c:66:5b:6c:32:
+             40:06:50:97:7e:69:94:86:f4:f9:88:f8:62:1f:2a:59:d9:ef:
+             6b:38:fb:81:d2:2b:33:0f:b5:65:ef:d7:fa:64:a8:f5:5a:f6:
+             06:c9:2d:ac:83:08:5d:16:88:b5:22:b5:66:81:44:25:2a:99:
+             be:90:cd:9b:e0:84:e2:30:6b:e6:39:7b:df:52:2b:6e:4f:be:
+             10:41:26:ef
 
-Now SubCA to issue the certificate
+Now switch to the CA and issue the certificate
 
-    cyber% cd -
-    ~/cyber/cert-hier/root-ca
-
-==> openssl ca -config sub-ca.conf -in ../server.csr -out ../server.crt -extensions server_ext
+==> cd root-ca
+==> openssl ca -config sub-ca.conf -in ../server-example.csr -out ../server-example.crt -extensions server_ext
 
     Using configuration from sub-ca.conf
     Check that the request matches the signature
@@ -671,51 +656,51 @@ Now SubCA to issue the certificate
         Data:
             Version: 3 (0x2)
             Serial Number:
-                2d:0f:e5:f0:00:44:77:c3:e0:31:8d:ba:18:07:c8:bd
+                7d:2b:5b:7f:9f:30:c3:b2:38:c6:e5:19:82:f0:c2:88
             Issuer:
                 countryName               = IN
                 organizationName          = Example
                 commonName                = Example SubCA
             Validity
-                Not Before: Jun 15 07:42:31 2019 GMT
-                Not After : Jun 14 07:42:31 2020 GMT
+                Not Before: Jul  4 16:31:49 2019 GMT
+                Not After : Jul  3 16:31:49 2020 GMT
             Subject:
                 countryName               = IN
                 stateOrProvinceName       = Tamil Nadu
                 organizationName          = Example
-                organizationalUnitName    = Engineering
+                organizationalUnitName    = Finance
                 commonName                = 127.0.0.1
-                emailAddress              = admin@example.com
+                emailAddress              = admin@coolcompany.example
             Subject Public Key Info:
                 Public Key Algorithm: rsaEncryption
                     RSA Public-Key: (2048 bit)
                     Modulus:
-                        00:bb:77:7f:6b:a3:1d:d4:4c:18:f0:69:c6:3a:bd:
-                        ae:fe:9e:22:85:47:a7:8e:31:d7:40:d2:81:eb:83:
-                        0d:01:54:8f:ad:5b:0e:39:5b:8c:7e:63:c3:c3:76:
-                        1f:b6:d7:49:1c:1e:e9:3a:54:43:95:e0:7c:4e:28:
-                        03:77:a1:b6:9f:a2:af:9e:34:b8:fe:27:05:ac:3c:
-                        dd:bd:8e:ac:2e:d5:a4:69:3a:62:25:b2:89:c5:c2:
-                        44:46:09:b1:11:4e:db:51:f9:70:e7:31:cd:9d:41:
-                        c7:a8:ca:9a:16:bc:66:79:9b:fc:8b:0a:c9:65:12:
-                        ff:11:25:87:c1:c4:fb:ec:34:96:3e:77:1b:40:69:
-                        52:c1:64:77:b9:61:cc:fe:cb:3f:87:1c:17:4c:12:
-                        fb:9e:3f:69:aa:87:7b:41:da:7e:47:24:11:a9:0e:
-                        a1:e9:ff:ce:5e:b1:e4:ee:4b:7a:b5:e2:84:87:aa:
-                        ec:88:d9:cb:d1:8f:94:38:97:da:36:05:c4:cf:b4:
-                        a6:22:36:84:3c:ac:04:c4:67:21:5b:ca:a9:b5:48:
-                        ff:bc:05:c5:48:0a:06:17:b2:d4:1f:e8:58:1f:1b:
-                        03:d3:0e:e3:1d:69:78:b8:3f:27:49:a3:5b:0c:5a:
-                        4e:02:fc:36:f6:14:2b:53:14:d7:4b:cc:d4:ed:1d:
-                        ac:bd
+                        00:a5:8b:ec:35:4c:fb:5c:46:9f:4e:a5:be:7b:32:
+                        c4:17:a0:d3:09:88:01:5e:36:04:f1:7d:c1:98:31:
+                        35:ea:62:ad:22:4a:5d:19:bd:0f:0f:f0:3a:f5:ca:
+                        66:ee:b0:a1:85:4f:af:b7:3a:d7:9d:60:5f:cd:b6:
+                        5f:fd:0f:db:94:5b:02:4f:e4:ad:b6:25:0d:25:bb:
+                        ce:55:86:27:2b:3e:57:df:72:1a:79:04:29:b5:dc:
+                        a5:23:5a:ff:48:72:a4:88:fb:fb:d3:f1:5c:1a:c4:
+                        05:e6:e0:b9:56:0e:c8:91:8e:fb:66:9d:68:67:e5:
+                        ca:ae:45:4c:e4:6b:05:6f:68:eb:6b:0c:05:d4:de:
+                        7b:40:f9:27:30:94:0f:ab:41:75:d1:38:9e:9c:04:
+                        49:b1:9c:47:97:e6:70:ae:35:7a:e1:79:12:bd:50:
+                        71:53:73:49:51:af:c0:73:f7:21:e8:75:a3:99:49:
+                        b7:0d:7f:df:4b:64:a0:4c:5c:a3:6a:dc:1f:17:6c:
+                        dd:00:a9:05:2e:7d:db:fc:ab:5a:65:17:e0:75:5f:
+                        77:b2:70:aa:97:be:02:6f:10:44:29:e3:31:b5:4b:
+                        b7:94:da:ba:23:75:4d:0c:b9:78:77:0e:65:aa:65:
+                        8a:a5:c1:11:5c:6e:1e:96:27:22:20:20:15:de:96:
+                        a5:c3
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
                 Authority Information Access: 
-                    CA Issuers - URI:http://sub-ca.example.com/sub-ca.cr
+                    CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
     
                 X509v3 Authority Key Identifier: 
-                    keyid:DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
+                    keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
     
                 X509v3 Basic Constraints: critical
                     CA:FALSE
@@ -729,94 +714,82 @@ Now SubCA to issue the certificate
                 X509v3 Key Usage: critical
                     Digital Signature
                 X509v3 Subject Key Identifier: 
-                    07:83:74:C2:08:A1:18:1A:DD:3A:C4:4B:D5:1B:F0:9C:88:BB:23:30
-    Certificate is to be certified until Jun 14 07:42:31 2020 GMT (365 days)
+                    B2:45:C4:C7:2A:FC:0E:55:10:7B:90:67:06:DE:C4:12:CF:C5:D5:A7
+    Certificate is to be certified until Jul  3 16:31:49 2020 GMT (365 days)
     Sign the certificate? [y/n]:y
     
     
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
-    cyber% ls -al
-    total 60
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 .
-    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 15 13:12 ..
-    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 13:12 certs
-    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 13:12 db
-    drwx------ 2 cybersecurity cybersecurity 4096 Jun 15 12:24 private
-    -rw-r--r-- 1 cybersecurity cybersecurity 2263 Jun 15 12:48 root-ca.conf
-    -rw-r--r-- 1 cybersecurity cybersecurity 3056 Jun 15 11:38 root-ca.conf~
-    -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 root-ca.crt
-    -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:02 root-ca.csr
-    -rw-r--r-- 1 cybersecurity cybersecurity 2945 Jun 15 12:48 sub-ca.conf
-    -rw-r--r-- 1 cybersecurity cybersecurity 2944 Jun 15 12:40 sub-ca.conf~
-    -rw-r--r-- 1 cybersecurity cybersecurity 8186 Jun 15 12:48 sub-ca.crt
-    -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:41 sub-ca.csr
-    cyber% ls -al certs
-    total 32
-    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 13:12 .
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 ..
-    -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 2D0FE5F0004477C3E0318DBA1807C8BB.pem
-    -rw-r--r-- 1 cybersecurity cybersecurity 8186 Jun 15 12:48 2D0FE5F0004477C3E0318DBA1807C8BC.pem
-    -rw-r--r-- 1 cybersecurity cybersecurity 6418 Jun 15 13:12 2D0FE5F0004477C3E0318DBA1807C8BD.pem
-    cyber% cat db/index
-    V	290612063326Z		2D0FE5F0004477C3E0318DBA1807C8BB	unknown	/C=IN/O=Example/CN=Example.com
-    V	290612071831Z		2D0FE5F0004477C3E0318DBA1807C8BC	unknown	/C=IN/O=Example/CN=Example SubCA
-    V	200614074231Z		2D0FE5F0004477C3E0318DBA1807C8BD	unknown	/C=IN/ST=Tamil Nadu/O=Example/OU=Engineering/CN=127.0.0.1/emailAddress=admin@example.com
-    cyber% cd ..
-    cyber% ls -al
-    total 32
-    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 15 13:12 .
-    drwxr-xr-x 6 cybersecurity cybersecurity 4096 Jun 12 20:30 ..
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 root-ca
-    -rw-r--r-- 1 cybersecurity cybersecurity 6418 Jun 15 13:12 server.crt
-    -rw-r--r-- 1 cybersecurity cybersecurity 1062 Jun 15 13:11 server.csr
-    -rw------- 1 cybersecurity cybersecurity 1679 Jun 12 20:32 serverkey.key
-    -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun 12 20:33 serverpubkey.key
 
-==> openssl x509 -noout -text -in server.crt
+==> ls -al db
+
+    total 36
+    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jul  4 22:01 .
+    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jul  4 21:32 ..
+    -rw-r--r-- 1 cybersecurity cybersecurity    5 Jul  4 21:10 crlnumber
+    -rw-r--r-- 1 cybersecurity cybersecurity  331 Jul  4 22:01 index
+    -rw-r--r-- 1 cybersecurity cybersecurity   20 Jul  4 22:01 index.attr
+    -rw-r--r-- 1 cybersecurity cybersecurity   20 Jul  4 21:32 index.attr.old
+    -rw-r--r-- 1 cybersecurity cybersecurity  180 Jul  4 21:32 index.old
+    -rw-r--r-- 1 cybersecurity cybersecurity   33 Jul  4 22:01 serial
+    -rw-r--r-- 1 cybersecurity cybersecurity   33 Jul  4 21:32 serial.old
+
+==> ls -al certs/
+
+    total 32
+    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jul  4 22:01 .
+    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jul  4 21:32 ..
+    -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jul  4 21:21 7D2B5B7F9F30C3B238C6E51982F0C286.pem
+    -rw-r--r-- 1 cybersecurity cybersecurity 7812 Jul  4 21:32 7D2B5B7F9F30C3B238C6E51982F0C287.pem
+    -rw-r--r-- 1 cybersecurity cybersecurity 6427 Jul  4 22:01 7D2B5B7F9F30C3B238C6E51982F0C288.pem
+
+Look at the certificate and verify everything looks good.
+
+==> openssl x509 -in server-example.crt -noout -text
 
     Certificate:
         Data:
             Version: 3 (0x2)
             Serial Number:
-                2d:0f:e5:f0:00:44:77:c3:e0:31:8d:ba:18:07:c8:bd
+                7d:2b:5b:7f:9f:30:c3:b2:38:c6:e5:19:82:f0:c2:8b
             Signature Algorithm: sha256WithRSAEncryption
             Issuer: C = IN, O = Example, CN = Example SubCA
             Validity
-                Not Before: Jun 15 07:42:31 2019 GMT
-                Not After : Jun 14 07:42:31 2020 GMT
-            Subject: C = IN, ST = Tamil Nadu, O = Example, OU = Engineering, CN = 127.0.0.1, emailAddress = admin@example.com
+                Not Before: Jul  4 17:10:09 2019 GMT
+                Not After : Jul  3 17:10:09 2020 GMT
+            Subject: C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
             Subject Public Key Info:
                 Public Key Algorithm: rsaEncryption
                     RSA Public-Key: (2048 bit)
                     Modulus:
-                        00:bb:77:7f:6b:a3:1d:d4:4c:18:f0:69:c6:3a:bd:
-                        ae:fe:9e:22:85:47:a7:8e:31:d7:40:d2:81:eb:83:
-                        0d:01:54:8f:ad:5b:0e:39:5b:8c:7e:63:c3:c3:76:
-                        1f:b6:d7:49:1c:1e:e9:3a:54:43:95:e0:7c:4e:28:
-                        03:77:a1:b6:9f:a2:af:9e:34:b8:fe:27:05:ac:3c:
-                        dd:bd:8e:ac:2e:d5:a4:69:3a:62:25:b2:89:c5:c2:
-                        44:46:09:b1:11:4e:db:51:f9:70:e7:31:cd:9d:41:
-                        c7:a8:ca:9a:16:bc:66:79:9b:fc:8b:0a:c9:65:12:
-                        ff:11:25:87:c1:c4:fb:ec:34:96:3e:77:1b:40:69:
-                        52:c1:64:77:b9:61:cc:fe:cb:3f:87:1c:17:4c:12:
-                        fb:9e:3f:69:aa:87:7b:41:da:7e:47:24:11:a9:0e:
-                        a1:e9:ff:ce:5e:b1:e4:ee:4b:7a:b5:e2:84:87:aa:
-                        ec:88:d9:cb:d1:8f:94:38:97:da:36:05:c4:cf:b4:
-                        a6:22:36:84:3c:ac:04:c4:67:21:5b:ca:a9:b5:48:
-                        ff:bc:05:c5:48:0a:06:17:b2:d4:1f:e8:58:1f:1b:
-                        03:d3:0e:e3:1d:69:78:b8:3f:27:49:a3:5b:0c:5a:
-                        4e:02:fc:36:f6:14:2b:53:14:d7:4b:cc:d4:ed:1d:
-                        ac:bd
+                        00:a5:8b:ec:35:4c:fb:5c:46:9f:4e:a5:be:7b:32:
+                        c4:17:a0:d3:09:88:01:5e:36:04:f1:7d:c1:98:31:
+                        35:ea:62:ad:22:4a:5d:19:bd:0f:0f:f0:3a:f5:ca:
+                        66:ee:b0:a1:85:4f:af:b7:3a:d7:9d:60:5f:cd:b6:
+                        5f:fd:0f:db:94:5b:02:4f:e4:ad:b6:25:0d:25:bb:
+                        ce:55:86:27:2b:3e:57:df:72:1a:79:04:29:b5:dc:
+                        a5:23:5a:ff:48:72:a4:88:fb:fb:d3:f1:5c:1a:c4:
+                        05:e6:e0:b9:56:0e:c8:91:8e:fb:66:9d:68:67:e5:
+                        ca:ae:45:4c:e4:6b:05:6f:68:eb:6b:0c:05:d4:de:
+                        7b:40:f9:27:30:94:0f:ab:41:75:d1:38:9e:9c:04:
+                        49:b1:9c:47:97:e6:70:ae:35:7a:e1:79:12:bd:50:
+                        71:53:73:49:51:af:c0:73:f7:21:e8:75:a3:99:49:
+                        b7:0d:7f:df:4b:64:a0:4c:5c:a3:6a:dc:1f:17:6c:
+                        dd:00:a9:05:2e:7d:db:fc:ab:5a:65:17:e0:75:5f:
+                        77:b2:70:aa:97:be:02:6f:10:44:29:e3:31:b5:4b:
+                        b7:94:da:ba:23:75:4d:0c:b9:78:77:0e:65:aa:65:
+                        8a:a5:c1:11:5c:6e:1e:96:27:22:20:20:15:de:96:
+                        a5:c3
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
                 Authority Information Access: 
-                    CA Issuers - URI:http://sub-ca.example.com/sub-ca.cr
+                    CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
     
                 X509v3 Authority Key Identifier: 
-                    keyid:DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
+                    keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
     
                 X509v3 Basic Constraints: critical
                     CA:FALSE
@@ -826,167 +799,62 @@ Now SubCA to issue the certificate
                       URI:http://sub-ca.example.com/sub-ca.crl
     
                 X509v3 Extended Key Usage: 
-                    TLS Web Client Authentication
+                    TLS Web Server Authentication
                 X509v3 Key Usage: critical
-                    Digital Signature
+                    Digital Signature, Key Encipherment
                 X509v3 Subject Key Identifier: 
-                    07:83:74:C2:08:A1:18:1A:DD:3A:C4:4B:D5:1B:F0:9C:88:BB:23:30
+                    B2:45:C4:C7:2A:FC:0E:55:10:7B:90:67:06:DE:C4:12:CF:C5:D5:A7
         Signature Algorithm: sha256WithRSAEncryption
-             40:c0:24:64:1c:ff:21:cc:22:cf:5d:54:ca:5f:a1:4b:ba:fa:
-             38:ff:4a:21:3a:62:c0:f8:b2:aa:ed:34:dc:d3:7d:7b:bb:56:
-             f8:f9:13:db:ac:6d:8b:77:60:14:6f:e6:ac:c8:25:16:e0:8a:
-             e5:05:f0:58:4c:16:35:6b:0d:a3:21:e9:86:e3:57:3b:ce:95:
-             4c:d6:11:ae:dc:d9:72:ce:ff:57:b4:2f:f3:68:bb:7f:71:15:
-             2b:13:56:2e:c9:95:29:e0:5b:66:3f:be:24:c5:70:10:69:ed:
-             df:19:94:29:e1:d5:79:04:a2:27:b7:f2:9e:27:9a:d5:79:1d:
-             5d:6c:be:00:d9:b7:58:46:36:4c:c9:32:c5:b7:73:63:c9:0d:
-             f8:40:20:00:4b:b2:e5:a9:c3:74:8f:37:9b:f7:ed:d9:b3:83:
-             09:db:eb:66:2f:91:59:5b:a8:61:7a:6d:35:29:d2:58:12:f4:
-             fe:16:89:58:6c:54:a9:6e:d7:6d:cd:b2:69:54:fb:40:58:c8:
-             6e:83:cc:02:0e:6e:15:fa:44:b8:2c:0d:c5:dc:1e:af:df:7c:
-             d9:cf:34:b0:ff:f6:ce:1d:92:0e:57:1e:ea:ed:80:be:ed:5e:
-             fb:90:7c:33:ef:a1:08:d5:0d:eb:60:fc:53:72:f5:99:01:53:
-             0a:82:42:c3:4b:41:09:ae:42:f3:74:82:68:67:87:20:47:85:
-             3f:05:17:cb:9f:06:69:ef:ee:de:a4:da:d9:86:ad:71:96:aa:
-             00:6e:c5:c0:3f:fb:64:17:f1:7b:e2:aa:e5:8e:b4:ef:fc:c9:
-             af:87:51:25:99:61:0e:0e:71:47:00:43:8e:ff:69:1a:ac:c2:
-             93:d9:ee:b5:21:39:46:e6:6d:9d:a8:01:80:0d:83:34:b2:02:
-             61:74:61:b3:48:2c:3e:9e:9a:91:e4:c7:1f:56:7e:eb:6e:16:
-             20:e2:46:f8:61:52:96:d8:2d:91:37:8c:19:22:98:9d:c6:f1:
-             20:70:ce:a9:29:ef:b8:6f:f3:64:81:3e:7c:2d:96:bf:08:dc:
-             a4:d9:60:36:47:7c:74:26:af:a7:15:31:a6:16:13:fd:5f:c3:
-             5e:0d:66:95:ec:48:d6:45:e2:6c:b6:8e:9d:7f:32:dc:5c:81:
-             5a:e3:3f:2c:77:cf:48:96:ac:f9:53:16:55:b2:88:f8:bd:06:
-             65:0c:de:35:a8:ba:5d:ac:07:72:4c:a0:f4:2b:10:22:39:82:
-             2e:92:7b:2c:f3:f0:b2:f6:ac:5c:74:36:05:42:f6:a0:67:1a:
-             b9:e5:4f:16:95:6d:0f:b4:88:7a:ff:31:90:63:99:66:17:12:
-             7a:07:a6:a4:aa:95:a8:92
-    cyber%
+             a2:d5:43:f8:e5:eb:91:de:7e:d7:c9:74:f1:81:13:34:a7:39:
+             83:8a:70:d5:94:b0:8f:8c:10:f8:33:0e:91:f8:81:cb:ac:e7:
+             a9:8c:91:82:6b:92:45:94:0b:e7:38:2d:d9:6a:62:bd:bd:b3:
+             15:75:18:6b:9a:cd:8a:e4:7e:28:f4:30:76:bb:8d:3e:63:16:
+             41:66:3f:77:ca:31:e2:e8:1a:ce:a6:d2:d8:5c:20:2f:a3:da:
+             43:91:08:97:9e:f0:60:9e:82:36:5e:fb:1d:1a:cb:64:95:67:
+             68:3b:9d:79:c1:f4:c2:54:88:db:de:b2:af:b6:cb:fc:47:27:
+             0b:ec:cc:b8:a6:ae:43:8c:7c:bd:87:96:45:1b:1c:10:64:5d:
+             eb:73:a2:7f:7f:bb:ef:1f:8c:b4:b5:52:cd:52:29:be:82:a9:
+             27:ef:dd:ab:68:f6:95:29:ad:b2:02:7e:7a:60:fb:05:cc:15:
+             88:a7:2d:64:ef:00:f1:58:c4:cb:47:65:2a:45:a2:4f:a3:1e:
+             ba:3e:c3:fa:d2:1a:ab:51:69:a0:17:38:1c:04:ef:1c:d3:25:
+             be:3f:a0:96:9b:25:1c:de:9a:06:ed:8e:e8:d5:ca:5c:e1:ba:
+             03:d0:21:3a:47:41:d8:89:5b:43:a7:bf:97:98:2f:41:8f:d2:
+             96:a9:b5:06:05:3d:a9:9b:a9:da:77:49:58:25:c3:a6:9e:2f:
+             84:d7:59:59:df:03:9a:0c:8f:06:95:0e:29:4a:e6:34:e5:f0:
+             38:11:92:3e:2a:6b:d4:27:eb:60:a1:9c:01:1e:14:4e:9a:af:
+             8a:19:ee:16:15:01:80:64:cc:73:73:69:82:ad:c9:f1:62:3d:
+             51:93:a6:ba:3d:4d:c3:94:b7:3c:13:44:b7:34:c8:b9:9a:4e:
+             1d:70:1e:42:46:57:65:ff:53:5e:ae:17:8d:c7:3e:7d:7c:87:
+             dc:4c:52:d7:a3:ee:5b:0d:83:84:68:72:3e:d3:ba:60:30:7f:
+             d1:5b:d8:4c:b7:1d:e9:d5:16:ff:63:67:cf:76:7d:4d:19:a0:
+             28:94:04:7c:b8:62:59:15:9d:bc:4f:a0:e6:2c:ce:12:a9:03:
+             45:43:be:d1:fd:d6:a8:b6:db:7c:c8:ab:94:2b:15:b0:a2:80:
+             e7:06:bc:70:21:d3:a9:af:8b:f0:f8:05:0b:15:2d:e0:25:e6:
+             13:34:f7:e4:75:d3:d9:6a:75:ff:5c:bc:f1:f6:bd:ad:d5:00:
+             ab:88:bc:f4:dc:54:11:e4:6e:4e:a2:62:8d:16:51:fe:58:e8:
+             fe:a0:f8:92:bb:70:20:4e:74:54:c1:f5:03:dd:44:2a:7b:b3:
+             db:c4:4c:68:f3:57:a3:ea
+
 
 ##	Create Client Certificate
 
-==> openssl genrsa -out clientkey.key 4096                                                    
+==> cd cert-hier
+==> openssl genrsa -out clientkey.key 4096
 
+
+    openssl genrsa -out clientkey.key 4096
     Generating RSA private key, 4096 bit long modulus (2 primes)
-    ....................++++
-    .............................................................................................................................................................++++
+    ...................................................................++++
+    ...............................................................................................................++++
     e is 65537 (0x010001)
-    cyber% ls -al
-    total 36
-    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jun 15 13:17 .
-    drwxr-xr-x 6 cybersecurity cybersecurity 4096 Jun 12 20:30 ..
-    -rw------- 1 cybersecurity cybersecurity 3243 Jun 15 13:17 clientkey.key
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:48 root-ca
-    -rw-r--r-- 1 cybersecurity cybersecurity 6418 Jun 15 13:12 server.crt
-    -rw-r--r-- 1 cybersecurity cybersecurity 1062 Jun 15 13:11 server.csr
-    -rw------- 1 cybersecurity cybersecurity 1679 Jun 12 20:32 serverkey.key
-    -rw-r--r-- 1 cybersecurity cybersecurity  451 Jun 12 20:33 serverpubkey.key
-    cyber%
 
-==> openssl req -new -key clientkey.key -out client.csr                                
 
-    You are about to be asked to enter information that will be incorporated
-    into your certificate request.
-    What you are about to enter is what is called a Distinguished Name or a DN.
-    There are quite a few fields but you can leave some blank
-    For some fields there will be a default value,
-    If you enter '.', the field will be left blank.
-    -----
-    Country Name (2 letter code) [AU]:IN
-    State or Province Name (full name) [Some-State]:Delhi
-    Locality Name (eg, city) []:Delhi
-    Organization Name (eg, company) [Internet Widgits Pty Ltd]:Example
-    Organizational Unit Name (eg, section) []:HR
-    Common Name (e.g. server FQDN or YOUR name) []:127.0.0.1
-    Email Address []:me@example.com
-    
-    Please enter the following 'extra' attributes
-    to be sent with your certificate request
-    A challenge password []:
-    An optional company name []:
-
-==> openssl req -noout -text -in client.csr
-
-    Certificate Request:
-        Data:
-            Version: 1 (0x0)
-            Subject: C = IN, ST = Delhi, L = Delhi, O = Example, OU = HR, CN = 127.0.0.1, emailAddress = me@example.com
-            Subject Public Key Info:
-                Public Key Algorithm: rsaEncryption
-                    RSA Public-Key: (4096 bit)
-                    Modulus:
-                        00:bb:e9:8e:2d:31:70:df:d4:ab:57:ae:ae:08:98:
-                        31:8c:bc:1e:d5:95:6a:81:6c:da:3d:7a:de:e4:4d:
-                        3e:90:8e:4f:7c:4c:71:a8:e4:c2:ec:5c:2f:c5:f7:
-                        55:38:64:e6:78:a9:ba:6f:d0:6e:6e:06:4e:bc:a5:
-                        d3:31:cc:73:38:26:58:fc:1b:88:82:0e:d1:64:cc:
-                        3f:45:cd:eb:59:41:17:5a:04:b0:12:63:06:f0:78:
-                        73:17:bb:92:6d:f1:81:67:35:0b:c5:34:61:e1:8f:
-                        fe:20:fb:26:a4:08:c4:ab:dd:5a:36:95:82:f9:11:
-                        6f:81:2e:b3:90:7f:ce:0e:6e:f0:f5:82:e2:08:aa:
-                        85:25:04:6e:d8:28:40:7f:ba:6c:3d:ed:af:a7:0d:
-                        3d:cd:35:9d:fb:3d:a2:8d:74:bc:f5:be:79:75:00:
-                        e9:0e:61:c3:96:64:12:11:7d:02:35:f6:46:b0:91:
-                        f9:2a:fe:28:cc:76:04:27:28:99:02:6b:35:c4:47:
-                        57:5c:90:0e:c2:1d:bb:6d:04:d9:fa:06:98:2c:53:
-                        62:56:b8:44:a0:97:da:de:32:49:0f:8f:d9:30:6d:
-                        65:ab:ce:8f:e4:f9:31:06:74:91:47:96:86:76:34:
-                        c4:32:74:a1:04:f9:ae:c9:f9:40:07:a0:93:12:6f:
-                        c4:ed:23:6f:7a:8b:40:02:22:98:54:95:a9:e7:00:
-                        86:d5:6a:fb:d9:29:27:0b:76:c4:b1:14:ed:3a:e2:
-                        c9:b6:ce:0d:b8:83:1e:cd:36:4a:c0:a6:21:aa:fe:
-                        49:fe:72:2f:89:fa:e7:bb:a5:2a:c4:ce:29:5b:3f:
-                        22:02:46:76:8e:e7:9d:10:ef:05:64:2e:6c:f9:10:
-                        31:0f:ea:08:2d:9e:22:22:c5:aa:d4:87:11:f2:f1:
-                        0a:c9:e2:7c:31:c2:f2:06:77:09:b2:e8:ac:1a:eb:
-                        f9:0e:eb:ac:eb:29:a9:b8:34:ea:79:7a:10:5e:d3:
-                        58:68:08:a9:8c:ed:ac:92:23:60:1e:63:a2:2f:ee:
-                        17:1d:ac:9a:e0:52:19:3a:76:09:df:dd:31:b4:dd:
-                        b3:4c:9b:61:86:5b:df:34:41:f0:34:de:c6:8a:d8:
-                        10:66:3a:f4:02:4a:59:68:9b:f0:31:39:3b:7e:77:
-                        b7:fd:88:c4:72:f0:5e:38:36:41:1b:85:03:f8:51:
-                        3a:8c:1e:cf:6f:1f:23:51:ad:85:2a:a0:db:2f:16:
-                        65:06:87:4b:ad:18:43:f0:a2:15:a1:76:10:b9:6c:
-                        c2:92:97:13:57:18:bf:01:eb:2c:e4:c0:2e:b7:68:
-                        45:92:e7:ff:70:51:62:4a:36:30:f9:42:19:c9:d1:
-                        38:72:eb
-                    Exponent: 65537 (0x10001)
-            Attributes:
-                a0:00
-        Signature Algorithm: sha256WithRSAEncryption
-             84:7d:40:70:4f:4a:5a:f6:c5:77:68:bd:30:2c:48:72:96:97:
-             24:2c:38:39:27:ee:86:ea:6b:9d:9e:8e:c9:10:3b:b1:7b:b2:
-             4b:0d:17:8b:5e:34:13:e3:d4:19:91:66:ec:d4:b9:ae:27:71:
-             7d:69:d3:81:a5:58:b2:87:11:8a:e6:3a:70:e2:91:6c:fb:ef:
-             2f:b3:12:d6:ba:42:37:e0:f3:31:41:07:72:c2:fb:0a:63:4e:
-             6e:4c:49:4f:a8:d9:5d:57:98:67:5e:32:ab:ca:f1:21:32:a3:
-             c4:e8:e2:d0:3b:6f:b2:de:52:fa:70:59:69:9e:28:c8:89:a6:
-             85:a3:29:d9:a0:8c:47:f0:2a:78:30:f7:5f:c9:09:51:69:50:
-             d4:7a:78:be:fc:89:60:f7:43:74:a7:a3:c5:18:e7:ab:f6:8c:
-             31:8b:c5:1f:83:61:84:7d:0f:48:1a:22:83:db:3e:2c:69:17:
-             c8:10:89:a4:b4:6d:f6:84:91:a2:a3:7e:4c:d8:d3:44:ee:17:
-             4c:e9:07:e0:51:f8:b6:2d:81:0a:cd:b6:a3:54:67:c1:19:7d:
-             3c:c3:6f:87:2e:a4:98:44:72:42:a8:d7:98:97:09:a2:79:fb:
-             bb:70:6d:d6:44:eb:e0:2b:f2:7f:dc:98:54:ae:ff:fb:d8:85:
-             b2:5e:02:95:1d:94:b2:69:4e:5c:c6:2a:8a:fd:01:0c:d6:29:
-             e3:db:70:25:a1:18:77:2f:26:19:f0:f4:05:4a:d6:85:f6:e8:
-             37:39:5c:45:56:45:04:aa:36:bb:d0:17:79:65:6b:76:81:8c:
-             18:dd:ab:b5:29:19:67:07:f0:de:e5:93:b4:c4:6f:9e:cc:d2:
-             b8:5b:1f:0a:5f:cc:73:1c:fe:3f:1f:5f:02:10:96:85:3e:a7:
-             91:f3:c7:3c:b1:a9:9b:45:39:f7:92:a0:66:18:f5:1c:09:ff:
-             98:de:58:6a:80:b3:9d:68:49:df:b0:ba:9b:c3:a9:5d:b9:63:
-             71:b2:ea:41:e9:6f:f8:99:d5:af:4d:b1:0d:27:36:02:56:4f:
-             f1:9d:b1:4b:13:d6:68:4e:26:d4:55:74:79:ba:62:55:2c:66:
-             3d:11:54:62:1e:d1:6a:f4:e1:ee:87:77:49:2e:ce:b7:c0:c1:
-             ff:08:5f:2e:b1:a6:fe:f6:2e:d7:35:17:70:fd:69:57:69:69:
-             7d:61:e3:36:83:76:bb:86:ed:51:8c:2f:9f:ac:5c:44:72:c1:
-             e8:64:27:7d:ef:48:46:cd:58:b7:e2:ad:b3:66:9d:c8:07:39:
-             c3:db:ec:6d:ce:24:b2:b2:cd:07:c4:60:84:04:11:f0:49:37:
-             89:25:7e:7d:2d:ba:80:2d
-    cyber%
+==> openssl req -new -config client-example.conf -key clientkey.key -out client-example.csr
+==> openssl req -in client-example.csr -noout -text
 
 SubCA has to issue certificate
 
+==> cd root-ca
 ==> openssl ca -config sub-ca.conf -in ../client.csr -out ../client.crt -extensions client_ext
 
     Using configuration from sub-ca.conf
@@ -997,60 +865,60 @@ SubCA has to issue certificate
         Data:
             Version: 3 (0x2)
             Serial Number:
-                2d:0f:e5:f0:00:44:77:c3:e0:31:8d:ba:18:07:c8:be
+                7d:2b:5b:7f:9f:30:c3:b2:38:c6:e5:19:82:f0:c2:89
             Issuer:
                 countryName               = IN
                 organizationName          = Example
                 commonName                = Example SubCA
             Validity
-                Not Before: Jun 15 07:55:05 2019 GMT
-                Not After : Jun 14 07:55:05 2020 GMT
+                Not Before: Jul  4 16:41:36 2019 GMT
+                Not After : Jul  3 16:41:36 2020 GMT
             Subject:
                 countryName               = IN
                 stateOrProvinceName       = Delhi
                 organizationName          = Example
                 organizationalUnitName    = HR
                 commonName                = 127.0.0.1
-                emailAddress              = me@example.com
+                emailAddress              = admin@coolcompany.example
             Subject Public Key Info:
                 Public Key Algorithm: rsaEncryption
                     RSA Public-Key: (4096 bit)
                     Modulus:
-                        00:bb:e9:8e:2d:31:70:df:d4:ab:57:ae:ae:08:98:
-                        31:8c:bc:1e:d5:95:6a:81:6c:da:3d:7a:de:e4:4d:
-                        3e:90:8e:4f:7c:4c:71:a8:e4:c2:ec:5c:2f:c5:f7:
-                        55:38:64:e6:78:a9:ba:6f:d0:6e:6e:06:4e:bc:a5:
-                        d3:31:cc:73:38:26:58:fc:1b:88:82:0e:d1:64:cc:
-                        3f:45:cd:eb:59:41:17:5a:04:b0:12:63:06:f0:78:
-                        73:17:bb:92:6d:f1:81:67:35:0b:c5:34:61:e1:8f:
-                        fe:20:fb:26:a4:08:c4:ab:dd:5a:36:95:82:f9:11:
-                        6f:81:2e:b3:90:7f:ce:0e:6e:f0:f5:82:e2:08:aa:
-                        85:25:04:6e:d8:28:40:7f:ba:6c:3d:ed:af:a7:0d:
-                        3d:cd:35:9d:fb:3d:a2:8d:74:bc:f5:be:79:75:00:
-                        e9:0e:61:c3:96:64:12:11:7d:02:35:f6:46:b0:91:
-                        f9:2a:fe:28:cc:76:04:27:28:99:02:6b:35:c4:47:
-                        57:5c:90:0e:c2:1d:bb:6d:04:d9:fa:06:98:2c:53:
-                        62:56:b8:44:a0:97:da:de:32:49:0f:8f:d9:30:6d:
-                        65:ab:ce:8f:e4:f9:31:06:74:91:47:96:86:76:34:
-                        c4:32:74:a1:04:f9:ae:c9:f9:40:07:a0:93:12:6f:
-                        c4:ed:23:6f:7a:8b:40:02:22:98:54:95:a9:e7:00:
-                        86:d5:6a:fb:d9:29:27:0b:76:c4:b1:14:ed:3a:e2:
-                        c9:b6:ce:0d:b8:83:1e:cd:36:4a:c0:a6:21:aa:fe:
-                        49:fe:72:2f:89:fa:e7:bb:a5:2a:c4:ce:29:5b:3f:
-                        22:02:46:76:8e:e7:9d:10:ef:05:64:2e:6c:f9:10:
-                        31:0f:ea:08:2d:9e:22:22:c5:aa:d4:87:11:f2:f1:
-                        0a:c9:e2:7c:31:c2:f2:06:77:09:b2:e8:ac:1a:eb:
-                        f9:0e:eb:ac:eb:29:a9:b8:34:ea:79:7a:10:5e:d3:
-                        58:68:08:a9:8c:ed:ac:92:23:60:1e:63:a2:2f:ee:
-                        17:1d:ac:9a:e0:52:19:3a:76:09:df:dd:31:b4:dd:
-                        b3:4c:9b:61:86:5b:df:34:41:f0:34:de:c6:8a:d8:
-                        10:66:3a:f4:02:4a:59:68:9b:f0:31:39:3b:7e:77:
-                        b7:fd:88:c4:72:f0:5e:38:36:41:1b:85:03:f8:51:
-                        3a:8c:1e:cf:6f:1f:23:51:ad:85:2a:a0:db:2f:16:
-                        65:06:87:4b:ad:18:43:f0:a2:15:a1:76:10:b9:6c:
-                        c2:92:97:13:57:18:bf:01:eb:2c:e4:c0:2e:b7:68:
-                        45:92:e7:ff:70:51:62:4a:36:30:f9:42:19:c9:d1:
-                        38:72:eb
+                        00:d7:9e:e4:e8:ef:2b:93:9a:3e:61:1a:8d:d6:1d:
+                        68:37:10:61:1f:8b:17:28:6b:81:37:dd:63:0f:d7:
+                        df:61:07:dc:a2:43:ba:17:3a:be:79:03:ff:46:4e:
+                        23:6d:0b:e4:7c:0d:a9:11:a7:cd:c6:30:81:34:b6:
+                        f7:a7:60:8e:ad:57:ee:78:85:02:9d:7c:54:7b:53:
+                        b2:bd:42:8a:c4:32:bd:00:98:87:37:e5:a4:27:b4:
+                        53:ae:b8:81:27:ec:64:f5:d9:c2:76:46:7a:ed:39:
+                        dd:77:91:99:a8:1f:ad:fa:a3:2f:a7:44:d8:c3:88:
+                        09:2f:2a:d5:8e:96:43:2b:d1:b9:ed:23:0d:f4:61:
+                        41:f8:0d:52:41:64:40:0b:01:63:47:06:d3:81:44:
+                        32:e8:54:43:f8:5d:fb:24:70:42:df:6c:36:c5:fe:
+                        de:86:77:7b:91:52:09:b5:c8:b4:e5:02:9b:5b:33:
+                        7a:02:1d:d8:16:ec:1a:cf:0e:44:e3:d2:c0:39:5d:
+                        d4:53:97:3e:f2:18:f0:48:75:ec:17:73:67:dc:40:
+                        80:61:33:22:e8:b2:60:9c:98:4b:82:7f:d9:55:d5:
+                        8c:cd:fb:9a:05:9f:4c:0d:d6:d2:0d:c1:a4:27:19:
+                        de:4b:f4:9e:ec:0d:17:c2:73:f7:c4:92:5d:8f:54:
+                        5b:f6:cd:b3:b4:00:47:4f:75:e5:2e:30:5b:bc:be:
+                        90:81:bb:bf:3e:cf:75:b8:21:f0:cd:ad:b6:29:ab:
+                        3a:2c:7f:1a:6f:d4:9d:df:9f:f5:c9:b5:ae:48:7f:
+                        0d:62:a1:8b:30:28:42:90:aa:9f:61:d1:82:3e:d8:
+                        ba:66:ac:15:cc:fa:0d:be:09:ff:78:b6:a5:98:77:
+                        bd:eb:44:3f:08:3a:55:f1:63:4f:4b:1a:40:90:76:
+                        d1:b2:bb:f4:d3:dc:4c:04:0d:89:72:b0:72:28:fb:
+                        29:31:31:cb:5c:0e:9a:91:8d:41:3f:3a:12:9e:25:
+                        7d:c4:7b:c4:d2:dd:66:51:6d:6a:45:79:97:d6:59:
+                        4a:7b:d7:0c:14:5b:a5:27:9e:bb:3c:c3:8c:db:df:
+                        e6:db:4b:1b:b4:55:97:8e:fc:bb:29:42:f3:99:ab:
+                        cc:d9:d2:78:12:81:69:e6:60:c6:6a:23:dd:07:14:
+                        1a:d0:ec:89:57:9b:b9:82:c0:95:13:f8:3f:7e:da:
+                        bd:9e:d7:b0:ab:26:38:a4:be:da:34:4f:35:a0:3d:
+                        69:b5:b4:a6:90:47:e0:bd:31:15:9a:c2:d7:fa:1b:
+                        94:7e:a5:1e:58:f9:40:19:8b:19:e9:c0:90:80:95:
+                        18:0d:2c:a0:aa:6d:3e:f1:0d:71:35:30:9f:87:5c:
+                        56:b2:e9
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
                 Authority Information Access: 
@@ -1058,7 +926,7 @@ SubCA has to issue certificate
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
     
                 X509v3 Authority Key Identifier: 
-                    keyid:DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
+                    keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
     
                 X509v3 Basic Constraints: critical
                     CA:FALSE
@@ -1072,162 +940,293 @@ SubCA has to issue certificate
                 X509v3 Key Usage: critical
                     Digital Signature, Key Encipherment
                 X509v3 Subject Key Identifier: 
-                    79:38:D7:2A:FC:06:F2:C9:D0:F2:0E:CF:15:1C:5E:A6:04:3F:E4:2B
-    Certificate is to be certified until Jun 14 07:55:05 2020 GMT (365 days)
+                    03:4A:E1:F8:93:95:3A:47:BB:BF:EC:16:4A:66:F6:3A:E3:C1:DB:AE
+    Certificate is to be certified until Jul  3 16:41:36 2020 GMT (365 days)
     Sign the certificate? [y/n]:y
     
     
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
-    cyber% 
-    cyber% cat db/index
-    V	290612063326Z		2D0FE5F0004477C3E0318DBA1807C8BB	unknown	/C=IN/O=Example/CN=Example.com
-    V	290612071831Z		2D0FE5F0004477C3E0318DBA1807C8BC	unknown	/C=IN/O=Example/CN=Example SubCA
-    V	200614074231Z		2D0FE5F0004477C3E0318DBA1807C8BD	unknown	/C=IN/ST=Tamil Nadu/O=Example/OU=Engineering/CN=127.0.0.1/emailAddress=admin@example.com
-    V	200614075505Z		2D0FE5F0004477C3E0318DBA1807C8BE	unknown	/C=IN/ST=Delhi/O=Example/OU=HR/CN=127.0.0.1/emailAddress=me@example.com
-    cyber%    
-    cyber% ls -al certs
+
+==> ls -al certs
+
     total 40
-    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jun 15 13:25 .
-    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 13:24 ..
-    -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jun 15 12:04 2D0FE5F0004477C3E0318DBA1807C8BB.pem
-    -rw-r--r-- 1 cybersecurity cybersecurity 8186 Jun 15 12:48 2D0FE5F0004477C3E0318DBA1807C8BC.pem
-    -rw-r--r-- 1 cybersecurity cybersecurity 6418 Jun 15 13:12 2D0FE5F0004477C3E0318DBA1807C8BD.pem
-    -rw-r--r-- 1 cybersecurity cybersecurity 7914 Jun 15 13:25 2D0FE5F0004477C3E0318DBA1807C8BE.pem
-    cyber%
+    drwxr-xr-x 2 cybersecurity cybersecurity 4096 Jul  4 22:11 .
+    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jul  4 21:32 ..
+    -rw-r--r-- 1 cybersecurity cybersecurity 6900 Jul  4 21:21 7D2B5B7F9F30C3B238C6E51982F0C286.pem
+    -rw-r--r-- 1 cybersecurity cybersecurity 7812 Jul  4 21:32 7D2B5B7F9F30C3B238C6E51982F0C287.pem
+    -rw-r--r-- 1 cybersecurity cybersecurity 6427 Jul  4 22:01 7D2B5B7F9F30C3B238C6E51982F0C288.pem
+    -rw-r--r-- 1 cybersecurity cybersecurity 7937 Jul  4 22:11 7D2B5B7F9F30C3B238C6E51982F0C289.pem
 
-==> openssl x509 -noout -text -in client.crt
+==> openssl x509 -noout -text -in client-example.crt
 
-    Certificate:
-        Data:
-            Version: 3 (0x2)
-            Serial Number:
-                2d:0f:e5:f0:00:44:77:c3:e0:31:8d:ba:18:07:c8:be
-            Signature Algorithm: sha256WithRSAEncryption
-            Issuer: C = IN, O = Example, CN = Example SubCA
-            Validity
-                Not Before: Jun 15 07:55:05 2019 GMT
-                Not After : Jun 14 07:55:05 2020 GMT
-            Subject: C = IN, ST = Delhi, O = Example, OU = HR, CN = 127.0.0.1, emailAddress = me@example.com
-            Subject Public Key Info:
-                Public Key Algorithm: rsaEncryption
-                    RSA Public-Key: (4096 bit)
-                    Modulus:
-                        00:bb:e9:8e:2d:31:70:df:d4:ab:57:ae:ae:08:98:
-                        31:8c:bc:1e:d5:95:6a:81:6c:da:3d:7a:de:e4:4d:
-                        3e:90:8e:4f:7c:4c:71:a8:e4:c2:ec:5c:2f:c5:f7:
-                        55:38:64:e6:78:a9:ba:6f:d0:6e:6e:06:4e:bc:a5:
-                        d3:31:cc:73:38:26:58:fc:1b:88:82:0e:d1:64:cc:
-                        3f:45:cd:eb:59:41:17:5a:04:b0:12:63:06:f0:78:
-                        73:17:bb:92:6d:f1:81:67:35:0b:c5:34:61:e1:8f:
-                        fe:20:fb:26:a4:08:c4:ab:dd:5a:36:95:82:f9:11:
-                        6f:81:2e:b3:90:7f:ce:0e:6e:f0:f5:82:e2:08:aa:
-                        85:25:04:6e:d8:28:40:7f:ba:6c:3d:ed:af:a7:0d:
-                        3d:cd:35:9d:fb:3d:a2:8d:74:bc:f5:be:79:75:00:
-                        e9:0e:61:c3:96:64:12:11:7d:02:35:f6:46:b0:91:
-                        f9:2a:fe:28:cc:76:04:27:28:99:02:6b:35:c4:47:
-                        57:5c:90:0e:c2:1d:bb:6d:04:d9:fa:06:98:2c:53:
-                        62:56:b8:44:a0:97:da:de:32:49:0f:8f:d9:30:6d:
-                        65:ab:ce:8f:e4:f9:31:06:74:91:47:96:86:76:34:
-                        c4:32:74:a1:04:f9:ae:c9:f9:40:07:a0:93:12:6f:
-                        c4:ed:23:6f:7a:8b:40:02:22:98:54:95:a9:e7:00:
-                        86:d5:6a:fb:d9:29:27:0b:76:c4:b1:14:ed:3a:e2:
-                        c9:b6:ce:0d:b8:83:1e:cd:36:4a:c0:a6:21:aa:fe:
-                        49:fe:72:2f:89:fa:e7:bb:a5:2a:c4:ce:29:5b:3f:
-                        22:02:46:76:8e:e7:9d:10:ef:05:64:2e:6c:f9:10:
-                        31:0f:ea:08:2d:9e:22:22:c5:aa:d4:87:11:f2:f1:
-                        0a:c9:e2:7c:31:c2:f2:06:77:09:b2:e8:ac:1a:eb:
-                        f9:0e:eb:ac:eb:29:a9:b8:34:ea:79:7a:10:5e:d3:
-                        58:68:08:a9:8c:ed:ac:92:23:60:1e:63:a2:2f:ee:
-                        17:1d:ac:9a:e0:52:19:3a:76:09:df:dd:31:b4:dd:
-                        b3:4c:9b:61:86:5b:df:34:41:f0:34:de:c6:8a:d8:
-                        10:66:3a:f4:02:4a:59:68:9b:f0:31:39:3b:7e:77:
-                        b7:fd:88:c4:72:f0:5e:38:36:41:1b:85:03:f8:51:
-                        3a:8c:1e:cf:6f:1f:23:51:ad:85:2a:a0:db:2f:16:
-                        65:06:87:4b:ad:18:43:f0:a2:15:a1:76:10:b9:6c:
-                        c2:92:97:13:57:18:bf:01:eb:2c:e4:c0:2e:b7:68:
-                        45:92:e7:ff:70:51:62:4a:36:30:f9:42:19:c9:d1:
-                        38:72:eb
-                    Exponent: 65537 (0x10001)
-            X509v3 extensions:
-                Authority Information Access: 
-                    CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
-                    OCSP - URI:http://ocsp.sub-ca.example.com:9081
-    
-                X509v3 Authority Key Identifier: 
-                    keyid:DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
-    
-                X509v3 Basic Constraints: critical
-                    CA:FALSE
-                X509v3 CRL Distribution Points: 
-    
-                    Full Name:
-                      URI:http://sub-ca.example.com/sub-ca.crl
-    
-                X509v3 Extended Key Usage: 
-                    TLS Web Client Authentication, TLS Web Server Authentication
-                X509v3 Key Usage: critical
-                    Digital Signature, Key Encipherment
-                X509v3 Subject Key Identifier: 
-                    79:38:D7:2A:FC:06:F2:C9:D0:F2:0E:CF:15:1C:5E:A6:04:3F:E4:2B
-        Signature Algorithm: sha256WithRSAEncryption
-             0a:9a:21:06:3f:fb:86:aa:46:6b:44:07:42:43:dc:e3:a9:44:
-             4a:a0:b7:80:16:6b:69:4f:80:61:70:6b:9a:f0:03:dc:a0:cb:
-             9f:d9:20:e3:c6:e1:e8:d2:8d:7b:76:67:28:01:69:8c:6e:fe:
-             35:e3:27:a2:26:0e:7e:5c:a4:1f:87:7c:57:af:e9:23:c1:2d:
-             11:e9:d9:42:a8:36:b2:cc:08:3d:e8:12:c2:52:e1:e7:0f:74:
-             fe:cf:e3:0f:5f:76:de:c1:56:ae:96:c0:43:68:6b:52:35:1b:
-             38:85:b5:91:8d:ec:2f:50:f3:4c:92:09:b8:c5:49:bf:88:bb:
-             40:98:9c:5c:09:4a:c7:c7:56:0c:06:d9:c3:b0:62:05:d8:48:
-             ce:66:83:1e:9b:e1:e8:65:89:ac:de:be:99:16:b8:e0:a7:fc:
-             49:06:00:67:79:68:aa:1d:53:ca:76:1a:7a:59:6b:8f:28:04:
-             e0:13:df:fc:60:64:ea:55:91:1d:bf:46:f7:62:ee:81:5d:7b:
-             a8:80:f4:78:81:41:27:f3:33:4d:ee:12:09:4b:4d:87:15:5f:
-             8b:29:3b:b1:5a:63:a5:1a:64:53:de:9b:ad:b5:89:77:c7:c4:
-             41:ae:9e:34:d5:07:7d:d1:08:b6:be:24:c9:20:82:39:23:bc:
-             df:97:90:72:1d:78:c6:61:7a:ca:cc:97:43:00:e4:75:a3:f1:
-             d1:62:78:a3:43:e7:79:ee:33:fb:27:34:e2:f3:e3:c7:f1:04:
-             d0:09:40:e7:72:47:03:d9:57:de:85:4f:b5:cd:60:87:69:a3:
-             29:7e:d9:27:52:41:38:82:61:ee:fc:b0:4e:9e:39:15:20:9f:
-             6b:d6:17:a1:ca:6b:29:63:a6:98:f2:c7:d8:1c:64:52:b0:b6:
-             67:d9:1b:64:c3:6f:e0:34:62:b7:aa:9c:ab:72:88:0d:ff:77:
-             d0:2f:75:e4:dc:0d:1a:d3:4c:8e:f2:9f:ae:b6:49:03:a4:ac:
-             ea:40:18:60:5c:2f:d4:b3:13:92:90:df:b9:e1:d3:da:7a:66:
-             90:92:6a:bd:3e:52:75:52:f9:22:f6:96:03:46:36:ce:5c:a9:
-             b5:a9:14:4d:46:70:1e:2b:10:7b:9c:1e:22:19:05:73:9b:35:
-             1a:1f:52:c6:a0:df:e7:7f:38:e6:54:89:0a:3b:f4:52:e0:4b:
-             38:4b:a6:d5:d8:22:a9:f2:eb:a7:8a:ca:97:52:11:1f:cc:49:
-             90:86:85:0c:b0:14:57:5c:f9:52:fa:7e:df:42:97:90:ce:aa:
-             f0:f6:eb:a2:cd:74:f6:48:a0:02:71:6f:16:30:5f:f7:ac:f0:
-             7b:de:9d:d8:88:19:2d:51
-    cyber%
+## Verify client and server certificates
 
-##	Launch client and server
-We can now use these certificates to launch a TLS server and
-client. This is a sample client and server with openssl.
+==> cd cert-hier
+==> ls -al
 
-    Server: openssl s_server -cert server.crt -key serverkey.key
-    Client: openssl s_client
+    total 64
+    drwxr-xr-x 3 cybersecurity cybersecurity 4096 Jul  4 22:11 .
+    drwxr-xr-x 8 cybersecurity cybersecurity 4096 Jul  4 21:07 ..
+    -rw-r--r-- 1 cybersecurity cybersecurity  153 Jul  4 22:06 client-example.conf
+    -rw-r--r-- 1 cybersecurity cybersecurity 7937 Jul  4 22:11 client-example.crt
+    -rw-r--r-- 1 cybersecurity cybersecurity 1744 Jul  4 22:09 client-example.csr
+    -rw------- 1 cybersecurity cybersecurity 3243 Jul  4 22:07 clientkey.key
+    drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jul  4 21:32 root-ca
+    -rw-r--r-- 1 cybersecurity cybersecurity  191 Jul  4 21:50 server-coolcompany.conf
+    -rw-r--r-- 1 cybersecurity cybersecurity 1102 Jul  4 21:52 server-coolcompany.csr
+    -rw-r--r-- 1 cybersecurity cybersecurity  165 Jul  4 21:58 server-example.conf
+    -rw-r--r-- 1 cybersecurity cybersecurity 6427 Jul  4 22:01 server-example.crt
+    -rw-r--r-- 1 cybersecurity cybersecurity 1070 Jul  4 22:00 server-example.csr
+    -rw------- 1 cybersecurity cybersecurity 1679 Jul  4 21:48 serverkey.key
+    -rw-r--r-- 1 cybersecurity cybersecurity  451 Jul  4 21:48 serverpubkey.key
 
-Client complains that it does not know the certificate chain. We need
-to inform the client that certain certificates – the root certificate
+==> openssl verify -purpose sslserver server-example.crt
+
+    C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+    error 20 at 0 depth lookup: unable to get local issuer certificate
+    error server-example.crt: verification failed
+
+==> openssl verify -CAfile root-ca/sub-ca.crt -purpose sslserver server-example.crt
+
+    C = IN, O = Example, CN = Example SubCA
+    error 2 at 1 depth lookup: unable to get issuer certificate
+    error server-example.crt: verification failed
+
+OpenSSL complains that it does not know the certificate chain. We need
+to inform openssl that certain certificates – the root certificate
 specifically and possibly more – are intrinsically trusted. These
 trusted certificates are inserted into a trust store.
 
-A trust store is created by concatenating all the certificates in the
+We create a trust store by concatenating all the certificates in the
 chain into a single file.
 
-    cat root-ca.crt sub-ca.crt > chain.crt
+==> cat root-ca/root-ca.crt root-ca/sub-ca.crt > ca-chain.crt
+==> cat ca-chain.crt | grep Subject
 
-Now use the chain as the truststore.
+    Subject: C=IN, O=Example, CN=Example.com
+    Subject Public Key Info:
+        X509v3 Subject Key Identifier: 
+    Subject: C=IN, O=Example, CN=Example SubCA
+    Subject Public Key Info:
+        X509v3 Subject Key Identifier:
 
-    Client: openssl s_client -CAfile chain.crt
+Now verify the certificates
 
-You can have separate certificates for the client and this will be
-sent to the server as well.
+==> openssl verify -purpose sslserver -CAfile ca-chain.crt server-example.crt
 
-    Client: openssl s_client -CAfile chain.crt -cert client.crt -key clientkey.key
+    server-example.crt: OK
+
+==> openssl verify -purpose sslclient -CAfile ca-chain.crt client-example.crt
+
+    client-example.crt: OK
+
+
+## Launch client and server
+We can now use these certificates to launch a TLS server and
+client. This is a sample client and server with openssl.
+
+==> openssl s_server -cert server-example.crt -key serverkey.key
+
+Server is now ready to accept connections:
+
+    Using default temp DH parameters
+    ACCEPT
+
+Lets start the client.
+
+==> openssl s_client
+
+Server throws out a bunch of messages:
+
+    -----BEGIN SSL SESSION PARAMETERS-----
+    MH0CAQECAgMEBAITAgQg5Ra8tgXNpuJ0WBjz4duVOkiuZ24SOKH+UE7tdkh19W4E
+    MBVwxTHT4ezv8BxOnzFI6zFd39yw9nJ3AE/wWoFkJwjFE1HDvzv5B6vbFlnTdgjl
+    9KEGAgRdHi6LogQCAhwgpAYEBAEAAACuBgIEItzu2Q==
+    -----END SSL SESSION PARAMETERS-----
+    Shared ciphers:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA
+    Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:Ed25519:Ed448:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512:ECDSA+SHA224:ECDSA+SHA1:RSA+SHA224:RSA+SHA1:DSA+SHA224:DSA+SHA1:DSA+SHA256:DSA+SHA384:DSA+SHA512
+    Shared Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:Ed25519:Ed448:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512:ECDSA+SHA224:ECDSA+SHA1:RSA+SHA224:RSA+SHA1
+    Supported Elliptic Groups: X25519:P-256:X448:P-521:P-384
+    Shared Elliptic groups: X25519:P-256:X448:P-521:P-384
+    ---
+    No server certificate CA names sent
+    CIPHER is TLS_AES_256_GCM_SHA384
+    Secure Renegotiation IS supported
+
+
+This is the TLS session setup information.
+
+The client complains that it cannot verify the authenticity of the
+server's certificate. We need the trust chain!
+
+    CONNECTED(00000003)
+    depth=0 C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+    verify error:num=20:unable to get local issuer certificate
+    verify return:1
+    depth=0 C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+    verify error:num=21:unable to verify the first certificate
+    verify return:1
+    ---
+    Certificate chain
+     0 s:C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+       i:C = IN, O = Example, CN = Example SubCA
+    ---
+    Server certificate
+	[server's certificate]
+
+Lets terminate the client (hit ^C) and use the chain as the truststore.
+
+==> openssl s_client -CAfile ca-chain.crt
+
+The certificate chain is now verified fine, but there is another
+error. We will not look 
+
+    CONNECTED(00000003)
+    depth=2 C = IN, O = Example, CN = Example.com
+    verify return:1
+    depth=1 C = IN, O = Example, CN = Example SubCA
+    verify return:1
+    depth=0 C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+    verify return:1
+    ---
+    Certificate chain
+     0 s:C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+       i:C = IN, O = Example, CN = Example SubCA
+    ---
+    Server certificate
+
+    -----BEGIN CERTIFICATE-----
+    MIIFaTCCA1GgAwIBAgIQfStbf58ww7I4xuUZgvDCizANBgkqhkiG9w0BAQsFADA3
+    MQswCQYDVQQGEwJJTjEQMA4GA1UECgwHRXhhbXBsZTEWMBQGA1UEAwwNRXhhbXBs
+    ZSBTdWJDQTAeFw0xOTA3MDQxNzEwMDlaFw0yMDA3MDMxNzEwMDlaMIGEMQswCQYD
+    VQQGEwJJTjETMBEGA1UECAwKVGFtaWwgTmFkdTEQMA4GA1UECgwHRXhhbXBsZTEQ
+    MA4GA1UECwwHRmluYW5jZTESMBAGA1UEAwwJMTI3LjAuMC4xMSgwJgYJKoZIhvcN
+    AQkBFhlhZG1pbkBjb29sY29tcGFueS5leGFtcGxlMIIBIjANBgkqhkiG9w0BAQEF
+    AAOCAQ8AMIIBCgKCAQEApYvsNUz7XEafTqW+ezLEF6DTCYgBXjYE8X3BmDE16mKt
+    IkpdGb0PD/A69cpm7rChhU+vtzrXnWBfzbZf/Q/blFsCT+SttiUNJbvOVYYnKz5X
+    33IaeQQptdylI1r/SHKkiPv70/FcGsQF5uC5Vg7IkY77Zp1oZ+XKrkVM5GsFb2jr
+    awwF1N57QPknMJQPq0F10TienARJsZxHl+ZwrjV64XkSvVBxU3NJUa/Ac/ch6HWj
+    mUm3DX/fS2SgTFyjatwfF2zdAKkFLn3b/KtaZRfgdV93snCql74CbxBEKeMxtUu3
+    lNq6I3VNDLl4dw5lqmWKpcERXG4eliciICAV3palwwIDAQABo4IBITCCAR0wcQYI
+    KwYBBQUHAQEEZTBjMDAGCCsGAQUFBzAChiRodHRwOi8vc3ViLWNhLmV4YW1wbGUu
+    Y29tL3N1Yi1jYS5jcnQwLwYIKwYBBQUHMAGGI2h0dHA6Ly9vY3NwLnN1Yi1jYS5l
+    eGFtcGxlLmNvbTo5MDgxMB8GA1UdIwQYMBaAFAfOqe66S4by9HkFN5lZ3fNDot6s
+    MAwGA1UdEwEB/wQCMAAwNQYDVR0fBC4wLDAqoCigJoYkaHR0cDovL3N1Yi1jYS5l
+    eGFtcGxlLmNvbS9zdWItY2EuY3JsMBMGA1UdJQQMMAoGCCsGAQUFBwMBMA4GA1Ud
+    DwEB/wQEAwIFoDAdBgNVHQ4EFgQUskXExyr8DlUQe5BnBt7EEs/F1acwDQYJKoZI
+    hvcNAQELBQADggIBAKLVQ/jl65HeftfJdPGBEzSnOYOKcNWUsI+MEPgzDpH4gcus
+    56mMkYJrkkWUC+c4LdlqYr29sxV1GGuazYrkfij0MHa7jT5jFkFmP3fKMeLoGs6m
+    0thcIC+j2kORCJee8GCegjZe+x0ay2SVZ2g7nXnB9MJUiNvesq+2y/xHJwvszLim
+    rkOMfL2HlkUbHBBkXetzon9/u+8fjLS1Us1SKb6CqSfv3ato9pUprbICfnpg+wXM
+    FYinLWTvAPFYxMtHZSpFok+jHro+w/rSGqtRaaAXOBwE7xzTJb4/oJabJRzemgbt
+    jujVylzhugPQITpHQdiJW0Onv5eYL0GP0paptQYFPambqdp3SVglw6aeL4TXWVnf
+    A5oMjwaVDilK5jTl8DgRkj4qa9Qn62ChnAEeFE6ar4oZ7hYVAYBkzHNzaYKtyfFi
+    PVGTpro9TcOUtzwTRLc0yLmaTh1wHkJGV2X/U16uF43HPn18h9xMUtej7lsNg4Ro
+    cj7TumAwf9Fb2Ey3HenVFv9jZ892fU0ZoCiUBHy4YlkVnbxPoOYszhKpA0VDvtH9
+    1qi223zIq5QrFbCigOcGvHAh06mvi/D4BQsVLeAl5hM09+R109lqdf9cvPH2va3V
+    AKuIvPTcVBHkbk6iYo0WUf5Y6P6g+JK7cCBOdFTB9QPdRCp7s9vETGjzV6Pq
+    -----END CERTIFICATE-----
+    subject=C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
+    
+    issuer=C = IN, O = Example, CN = Example SubCA
+    
+    ---
+    No client certificate CA names sent
+    Peer signing digest: SHA256
+    Peer signature type: RSA-PSS
+    Server Temp Key: X25519, 253 bits
+    ---
+    SSL handshake has read 1945 bytes and written 391 bytes
+    Verification: OK
+    ---
+    New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+    Server public key is 2048 bit
+    Secure Renegotiation IS NOT supported
+    Compression: NONE
+    Expansion: NONE
+    No ALPN negotiated
+    Early data was not sent
+    Verify return code: 0 (ok)
+    ---
+    ---
+    Post-Handshake New Session Ticket arrived:
+    SSL-Session:
+        Protocol  : TLSv1.3
+        Cipher    : TLS_AES_256_GCM_SHA384
+        Session-ID: 15B2DD6D76BABE5AF375961EE0C40F7A9DBBB6FE6F811530BE23D6C97FEC01D2
+        Session-ID-ctx: 
+        Resumption PSK: AC5045E1554082E795CE6107712E1C01943182F29A2B7FCD76E44D4C9595D053FF4243E996039768F16E7C9CADFB1696
+        PSK identity: None
+        PSK identity hint: None
+        SRP username: None
+        TLS session ticket lifetime hint: 7200 (seconds)
+        TLS session ticket:
+        0000 - 5e aa 0b 95 a6 b4 01 c9-32 43 01 43 bb 9d c6 fb   ^.......2C.C....
+        0010 - b4 e0 20 39 b6 3c 6c ec-ae 82 35 5b 7f 0f 3f 95   .. 9.<l...5[..?.
+        0020 - 59 54 69 45 2a 1e be 9d-9f 0b b2 7a 0e 25 17 56   YTiE*......z.%.V
+        0030 - d2 98 b5 62 1e 20 33 e7-7b 10 ae 6d 3b 9d 29 05   ...b. 3.{..m;.).
+        0040 - ea 06 ee 88 6b bf 78 48-c5 99 6e 63 19 d1 52 62   ....k.xH..nc..Rb
+        0050 - a1 7c 6b 3e 86 75 41 f8-92 b4 97 a9 be ca e2 c8   .|k>.uA.........
+        0060 - 3e 40 f5 c4 2f d0 35 db-b7 19 13 80 c5 9c 6e 2c   >@../.5.......n,
+        0070 - 87 e6 1e ab e8 bc b6 73-41 78 f8 d0 e0 5e 12 e9   .......sAx...^..
+        0080 - 8a d6 e7 3a c5 33 ad 6f-0d ca 29 7b a1 3b d7 85   ...:.3.o..){.;..
+        0090 - c4 b3 20 97 4a cc ff ae-66 97 46 9b 3f 02 fc a2   .. .J...f.F.?...
+        00a0 - c7 16 51 51 f4 1b 07 e0-f8 29 2b 08 40 94 b0 9a   ..QQ.....)+.@...
+        00b0 - 9a e6 3e 77 74 7e 30 09-3e 1c fd b0 96 45 c6 e1   ..>wt~0.>....E..
+        00c0 - 3e 1c 38 43 1f 95 c2 59-71 6f 40 62 54 c0 18 8f   >.8C...Yqo@bT...
+    
+        Start Time: 1562260669
+        Timeout   : 7200 (sec)
+        Verify return code: 0 (ok)
+        Extended master secret: no
+        Max Early Data: 0
+    ---
+    read R BLOCK
+    ---
+    Post-Handshake New Session Ticket arrived:
+    SSL-Session:
+        Protocol  : TLSv1.3
+        Cipher    : TLS_AES_256_GCM_SHA384
+        Session-ID: 55EF5206942344ED00C65638750230EC64FC29489D21A4EE549C5F5BC63F4D29
+        Session-ID-ctx: 
+        Resumption PSK: E990FDF5EAEB48300379B4A8E5B44FB0DBE62D7BD3D81A8193167689F28FA70A26EDD9CC3586DBE9EC763894F7A9A002
+        PSK identity: None
+        PSK identity hint: None
+        SRP username: None
+        TLS session ticket lifetime hint: 7200 (seconds)
+        TLS session ticket:
+        0000 - 5e aa 0b 95 a6 b4 01 c9-32 43 01 43 bb 9d c6 fb   ^.......2C.C....
+        0010 - 7a 91 bf 3a fb 4c b5 5a-e9 4f e9 5d 8c 98 43 01   z..:.L.Z.O.]..C.
+        0020 - e5 5c 98 33 5b bd 26 50-5f bb f9 64 c7 d7 85 f3   .\.3[.&P_..d....
+        0030 - 2a 69 9d 33 cf d2 30 7f-f7 00 fb ed 46 96 38 e0   *i.3..0.....F.8.
+        0040 - 1f 87 92 bc 75 1a bc 24-41 3a 13 bf 22 5f 8a df   ....u..$A:.."_..
+        0050 - c6 13 b6 c9 8e 5c 24 d8-3e a0 ea 2a e5 3d 9d 9f   .....\$.>..*.=..
+        0060 - 55 14 77 10 01 74 c1 66-6b 76 af 39 2d 59 c8 69   U.w..t.fkv.9-Y.i
+        0070 - fa 86 4d 37 a2 fe 0c 09-04 bc 38 94 86 b4 d6 8f   ..M7......8.....
+        0080 - b7 ff 47 8d 28 78 a7 6b-db 0e bb c0 b8 b9 75 6a   ..G.(x.k......uj
+        0090 - e3 0b 80 48 44 37 e2 8e-16 c2 af 9f ea 04 bb bd   ...HD7..........
+        00a0 - 94 e4 a6 70 35 ac 46 88-7e 58 dc fc 46 fa 95 05   ...p5.F.~X..F...
+        00b0 - 76 00 5b ce a1 0b 0d ac-a9 67 df 75 2f 5e 2f 68   v.[......g.u/^/h
+        00c0 - ef dd d2 ee e9 62 c9 e6-f5 47 0b 5e 95 db d0 75   .....b...G.^...u
+    
+        Start Time: 1562260669
+        Timeout   : 7200 (sec)
+        Verify return code: 0 (ok)
+        Extended master secret: no
+        Max Early Data: 0
+    ---
+    read R BLOCK
+
+
+You can now type anything you want and see the messages going
+through. 
+
+You can also have separate certificates for the client and this will
+be sent to the server as well.
+
+    Client: openssl s_client -CAfile ca-chain.crt -cert client.crt -key clientkey.key
 
 ##	Looking up Services
 Lets look at a few different websites and see their structure. Use the
@@ -1418,7 +1417,12 @@ Yahoo:
         Extended master secret: no
     ---
     ^C
-    cyber%
+
+## The Green Lock Test
+
+You can compare the cert downloaded via openssl to the cert
+information you get from the browser. Download the certificate from
+the browser's Green Lock.
 
 ==> openssl x509 -in yahoo.crt -text -noout
 
