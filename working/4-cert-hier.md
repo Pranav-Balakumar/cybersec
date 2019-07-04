@@ -49,6 +49,7 @@ configuration details.
     -rw-r--r-- 1 cybersecurity cybersecurity 1740 Jun 15 12:02 root-ca.csr
 
 ==> openssl req -noout -text -in root-ca.csr
+
 Look at "requested extensions"
 
     Certificate Request:
@@ -514,7 +515,7 @@ We will now create certificates for server and client. We will not do
 this in the root-ca folder since they are not managed by the
 CA. Instead they are managed by the user/application/customer.
 
-    cd cert-hier
+==> cd cert-hier
 	
 ==> openssl genrsa -out serverkey.key
 
