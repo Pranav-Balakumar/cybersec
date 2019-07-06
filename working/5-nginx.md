@@ -45,6 +45,11 @@ Go to https://localhost. You should not see any website there.
 ==> mkdir /home/cybersecurity/certs/
 ==> cp serverkey.key server-example.crt /home/cybersecurity/certs/
 ==> chmod 400 /home/cybersecurity/certs/serverkey.key
+
+Concatenate the intermediate sub-ca.crt into the server certificate.
+
+==> cat root-ca/sub-ca.crt >> /home/cybersecurity/certs/server-example.crt
+
 ==> ls -al /home/cybersecurity/certs/
 
     total 20
