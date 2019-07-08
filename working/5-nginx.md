@@ -75,26 +75,26 @@ below.
 
 * SSL settings: The below lines set up the location of the key and certificate.
 
-     	# SSL Settings
-     	##
-     
-    +        ssl_certificate     /home/cybersecurity/certs/server-example.crt;
-    +        ssl_certificate_key /home/cybersecurity/certs/serverkey.key;
-    +        ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
-     	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
-     	ssl_prefer_server_ciphers on;
+        # SSL Settings
+             	##
+             
+            +        ssl_certificate     /home/cybersecurity/certs/server-example.crt;
+            +        ssl_certificate_key /home/cybersecurity/certs/serverkey.key;
+            +        ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
+             	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+             	ssl_prefer_server_ciphers on;
 
 * Start HTTPS server: The below lines start SSL server at port 443 and
   provide a servername
      
-     	include /etc/nginx/conf.d/*.conf;
-     	include /etc/nginx/sites-enabled/*;
-     
-    +	server {
-    +    		listen              443 ssl default_server;
-    +    		listen              [::]:443 ssl default_server ;
-    +	}
-     }
+        include /etc/nginx/conf.d/*.conf;
+             	include /etc/nginx/sites-enabled/*;
+             
+            +	server {
+            +    		listen              443 ssl default_server;
+            +    		listen              [::]:443 ssl default_server ;
+            +	}
+             }
      
 ## Verify nginx configuration and reload nginx
 
