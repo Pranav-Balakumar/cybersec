@@ -1,91 +1,92 @@
 #	Key Pair Usage - hands on
 ##	Generate RSA key pair
 
-==> openssl genrsa
+1. openssl genrsa: generate RSA keypair
 
-    Generating RSA private key, 2048 bit long modulus (2 primes)
-    .....+++++
-    ..........+++++
-    e is 65537 (0x010001)
-    -----BEGIN RSA PRIVATE KEY-----
-    MIIEpgIBAAKCAQEA7Nk5LpuPA1ZiWqCHfwVi1holwLTkb2hTwX4iOarC8fEfWMLk
-    heqfvi7Aik7PZOKtLVl4q8jebjqxBm2hnow+TcBfPCGiJGlzFn9ABGO122qtJ20e
-    YsjhB7kronG/DG82b/pc7ostT3ZBpjEykt8ytTPBxAt5+pFclXzj65eP4ERki25w
-    RMqCzFKWzc/q++fWfun053m+T26HeP4zCHMkPV9vTIJuI+dtuJ0Xa19k8kf61KBU
-    7wFDuDbo3rfs7dk3Nv1b68/IxSo2aLl8vMhJ5S1bM6F4ifUcZqfh9cDpqfw0L1jl
-    xaI9nJkbQzJ5jnqDncSAVtERHNSu4zOxsXxLkQIDAQABAoIBAQCMkLL2LU5oLal7
-    ndAsm5a3+Ja1UuZMFD+5E1HepbDDBFaVSD12GPQrW/XbX8CIYFtlEbejRDh2dRDA
-    /umvfg4v+N7Mgi2HrKmoDWeB82dnzFztjD4/ZHbhLY1vAFDhYVOOi6kBzcnbYhS+
-    PG6Gaj7e+dOitSj0g7bN5WwjUzUJZIlG/VKKWnRGZtstXX5jm0wQew6PW561tv8Y
-    s/J2AAab/2THcHQQ5tqsaCwyCLimSBvE7DoYxcf9LKIpTEuZOpA5Bz66PJdgnYzY
-    EXutIw8DU1iA6Uw5KZHaAl0ByAitpCezfThLjJkSkVP5fKRrsek9sDRIygtVa3Qa
-    nEEVwMjdAoGBAP+sKcVtLOqtRMcEzPqksd1gNX1Dxy99Hb+3VmVrJuFukssEDGKM
-    BPaaE5cCzSDRZJ4p7Bt+Xpp4qAMDnA2a4VWEMTCbVdvEgOTxSGBPvLpYqcpt3cQA
-    gLC2TLWlVgWDi08BJdLiwBBnBSajT72RveUeMyFyh3QLgWrvRvIHHiDXAoGBAO0m
-    4z8NymYt6+KYN0yBWYfBjuXlOZVjVAURcKcrnQrQ6zB/KT7IzR+NkSA/JwmCv454
-    pIbPLyAYtvqdi8wEIwC1ROvB0dra6kVuUTlKLSjy6wvKq1NEibFptJf42JtvsqHZ
-    y3NzH/Zw25ha7jGilwfgPR3vj1+cMlA6Ph19RSHXAoGBAPxrPiZDnmfnPxL6I2GF
-    vnDgbo7Intu8u+Uunaatfopsf5Ld4VheAvxwq8yYoGq5MIySuR9/yOjbHI01QBmS
-    gsvKIkJp6f96ZwMhUCJ+NscHiEJp69t535QXt25S2LXC5IPQj0ZARf0rqMM30x9G
-    x2NwSGzKRP8F6PTpXXLQIierAoGBANtoBAy9HImmaLtuqpK8hXGFEUj+52SfzgcW
-    WIxBXHy6Ry3KKAWvT5+moSMdamdxMPqGAWm721StqPR6t/DbzuqDyqz318jMirwL
-    0VfYmalt/Soeqp1SJrYeHvgPQY+lKrZ1QragR20AgxoU3pTLYUHnI4RDs/j4ENCK
-    4hb0Y/ZnAoGBAIoAitJHM6tCypiQB+wMvBjmTeV90smglGoq20a7MiwKMHlidxxI
-    YcY5AVMCeahOxpIA7cNMWTMvgZru+rQblLXCWD/tZ3Gd9MQzf0sunxWKJhUV/Mk0
-    mPX/HkBJaXu2kN5gkFXAHCs9E8SJLWy6FG4tKox+Uw9wo0G1Br+WVAHQ
-    -----END RSA PRIVATE KEY-----
+	    Generating RSA private key, 2048 bit long modulus (2 primes)
+	    .....+++++
+	    ..........+++++
+	    e is 65537 (0x010001)
+	    -----BEGIN RSA PRIVATE KEY-----
+	    MIIEpgIBAAKCAQEA7Nk5LpuPA1ZiWqCHfwVi1holwLTkb2hTwX4iOarC8fEfWMLk
+	    heqfvi7Aik7PZOKtLVl4q8jebjqxBm2hnow+TcBfPCGiJGlzFn9ABGO122qtJ20e
+	    YsjhB7kronG/DG82b/pc7ostT3ZBpjEykt8ytTPBxAt5+pFclXzj65eP4ERki25w
+	    RMqCzFKWzc/q++fWfun053m+T26HeP4zCHMkPV9vTIJuI+dtuJ0Xa19k8kf61KBU
+	    7wFDuDbo3rfs7dk3Nv1b68/IxSo2aLl8vMhJ5S1bM6F4ifUcZqfh9cDpqfw0L1jl
+	    xaI9nJkbQzJ5jnqDncSAVtERHNSu4zOxsXxLkQIDAQABAoIBAQCMkLL2LU5oLal7
+	    ndAsm5a3+Ja1UuZMFD+5E1HepbDDBFaVSD12GPQrW/XbX8CIYFtlEbejRDh2dRDA
+	    /umvfg4v+N7Mgi2HrKmoDWeB82dnzFztjD4/ZHbhLY1vAFDhYVOOi6kBzcnbYhS+
+	    PG6Gaj7e+dOitSj0g7bN5WwjUzUJZIlG/VKKWnRGZtstXX5jm0wQew6PW561tv8Y
+	    s/J2AAab/2THcHQQ5tqsaCwyCLimSBvE7DoYxcf9LKIpTEuZOpA5Bz66PJdgnYzY
+	    EXutIw8DU1iA6Uw5KZHaAl0ByAitpCezfThLjJkSkVP5fKRrsek9sDRIygtVa3Qa
+	    nEEVwMjdAoGBAP+sKcVtLOqtRMcEzPqksd1gNX1Dxy99Hb+3VmVrJuFukssEDGKM
+	    BPaaE5cCzSDRZJ4p7Bt+Xpp4qAMDnA2a4VWEMTCbVdvEgOTxSGBPvLpYqcpt3cQA
+	    gLC2TLWlVgWDi08BJdLiwBBnBSajT72RveUeMyFyh3QLgWrvRvIHHiDXAoGBAO0m
+	    4z8NymYt6+KYN0yBWYfBjuXlOZVjVAURcKcrnQrQ6zB/KT7IzR+NkSA/JwmCv454
+	    pIbPLyAYtvqdi8wEIwC1ROvB0dra6kVuUTlKLSjy6wvKq1NEibFptJf42JtvsqHZ
+	    y3NzH/Zw25ha7jGilwfgPR3vj1+cMlA6Ph19RSHXAoGBAPxrPiZDnmfnPxL6I2GF
+	    vnDgbo7Intu8u+Uunaatfopsf5Ld4VheAvxwq8yYoGq5MIySuR9/yOjbHI01QBmS
+	    gsvKIkJp6f96ZwMhUCJ+NscHiEJp69t535QXt25S2LXC5IPQj0ZARf0rqMM30x9G
+	    x2NwSGzKRP8F6PTpXXLQIierAoGBANtoBAy9HImmaLtuqpK8hXGFEUj+52SfzgcW
+	    WIxBXHy6Ry3KKAWvT5+moSMdamdxMPqGAWm721StqPR6t/DbzuqDyqz318jMirwL
+	    0VfYmalt/Soeqp1SJrYeHvgPQY+lKrZ1QragR20AgxoU3pTLYUHnI4RDs/j4ENCK
+	    4hb0Y/ZnAoGBAIoAitJHM6tCypiQB+wMvBjmTeV90smglGoq20a7MiwKMHlidxxI
+	    YcY5AVMCeahOxpIA7cNMWTMvgZru+rQblLXCWD/tZ3Gd9MQzf0sunxWKJhUV/Mk0
+	    mPX/HkBJaXu2kN5gkFXAHCs9E8SJLWy6FG4tKox+Uw9wo0G1Br+WVAHQ
+	    -----END RSA PRIVATE KEY-----
 
 
-Generate the keys and encrypt them using aes128 with a password.
+2. openssl genrsa -aes128 2048: Generate the keys and encrypt them
+   using aes128 with a password.
 
-==> openssl genrsa -aes128 2048
 
-    Generating RSA private key, 2048 bit long modulus (2 primes)
-    .........................................................................+++++
-    .......................................................+++++
-    e is 65537 (0x010001)
-    Enter pass phrase:
-    Verifying - Enter pass phrase:
-    -----BEGIN RSA PRIVATE KEY-----
-    Proc-Type: 4,ENCRYPTED
-    DEK-Info: AES-128-CBC,340F7B75AA2A289A828F7AC1E20DB68B
-    
-    xTxjUWV5xvlYKneT/XRif2Hj8s/xtJHPEjn4gt5ceKcfJdMNnVam1cWM96d+gS2W
-    u8aDw5dT3zCSnLpQAMK5bhBTWWN3/pBktvRfDXLTo+PpJEYvCppTYhM42kb8Q4+y
-    09jdFwPFHBHwy9a9nbR3Nlb0TIpwZgEQ0/dXX4GVyjfJe9cwxI4FTfSip58rrs8V
-    e+5dOL+3K+CfMB71jGb/z9KWzkD/6veVbnwMuqmBVN5RxnepH8ozNHhrLDJ9Z2Xd
-    cifFB0SFXZljFAGXZs2NH9LlkzCasYhgmLSxkBz/zz6qKgUaWERF9Zvgkja/jMfO
-    iavQUdOg+DKxTH1beDU3Aol1f7IOTTdnzNjbAABDe6VXsCphy7u7Aj8dWdfGDD9V
-    NCNPCNcw2DAlSRmJHOXZLQJH2YLuY8HbY53KAVAzZrZQ/8tz7oKCQTKCY/jx8nt7
-    fCEa6Z7W5/KgJ/eaWMb4KUkVkcPTWruz1X8P2GGBOjXJKL4XB1fQavi8HLFZyDc6
-    ccv2QODlXT+KMunAURxJw7Pe/cVA1JDHrCTLlgwQ1nkGSl7vSytaVnuZrG1MAb5C
-    azduzCvrq87L3kTuDFZzYTNAyxAwkMw3BxrD7QmDXhQY6IJldR5pWufarDtJBNwA
-    vMvKT6BPo2P1nrP/cVpOsTY5+7hryO+/A2blM2ErOMHtYswyQ1kQtBnOibwXTW0V
-    bd4FEBMy09Vuh0a6fFaramFtcCpQiKowJ+2a7QYQySi8Wl+y+iKvo7dKW7q9nHBj
-    3VOgv424i2NsAmx3xw3VvHI4DX2HWVSu65QVqZbCqcHnbGNlv20wb+rIwkSSJtN1
-    wakbqdkafs3WR4R+N7uYMpx4sI69FmXVwWnmNSru9ng3dNBLDPzBDBltoyQ5j8L2
-    ud5WWApziitWURg9YR5wie1jsvWKyJG1oVE8OQ+ekzn89yPyYyLqzjzkksPZOwWA
-    pBpWs6hwkTXuEeWqUz+MRhMq7r8yk59BaAgTcFc6z18MOyAGwCYZbM8U4OP/Fcay
-    /ZZj89HSJY8Z/Qre/5EH5b1Hz3taTa4UwIbWOxJSSuhJP6MF4P9wyYwG6CjFLzz1
-    4Rwzi66nmGiEHZNX3kN16zEeie8PrOyDqIQmz+h3C7n3SotYc2LYkJHrCPNYTAjs
-    kjg6hOwrs00WNfSprRENuxf9/JcbeTJ9iLN9jwn12MoHQLOmxH4vEk3QVF0nSdIH
-    iQFKAWiamw8DpVxoaDFoFoc8ABGJjokc6f90pDgNpi0XIxh/27aI1X/Su9cPLW3/
-    vVScgV8HuRev3W7E0KwUkXVqR701E2CEoz7y5VYiEkTU9oicC2A2MpcsvmUDqIBr
-    EvAkRyzGr0FW00cvic50iE1PlZyPA4MBVOk4z6KYpbEgNuO/Cyxgr80L14LnUMSx
-    +ww80AinfqB8hBDZApLheXk7MpRFGuPd29ECDfnA3cWI9jRWGQdt6ZQ8NWkjmiUV
-    oWjx8OIQzdkUTNtZLiSGWz6jMcnP8IyOUqOrN2qC2Yji340L17RyJNp49VYIZUhv
-    vMT64WAEVTPsEFpaFDsuf4SPbv8cO/8OVbzdhho63wSb51fmufVZBiYESRTWE3hA
-    -----END RSA PRIVATE KEY-----
+	    Generating RSA private key, 2048 bit long modulus (2 primes)
+	    .........................................................................+++++
+	    .......................................................+++++
+	    e is 65537 (0x010001)
+	    Enter pass phrase:
+	    Verifying - Enter pass phrase:
+	    -----BEGIN RSA PRIVATE KEY-----
+	    Proc-Type: 4,ENCRYPTED
+	    DEK-Info: AES-128-CBC,340F7B75AA2A289A828F7AC1E20DB68B
+	    
+	    xTxjUWV5xvlYKneT/XRif2Hj8s/xtJHPEjn4gt5ceKcfJdMNnVam1cWM96d+gS2W
+	    u8aDw5dT3zCSnLpQAMK5bhBTWWN3/pBktvRfDXLTo+PpJEYvCppTYhM42kb8Q4+y
+	    09jdFwPFHBHwy9a9nbR3Nlb0TIpwZgEQ0/dXX4GVyjfJe9cwxI4FTfSip58rrs8V
+	    e+5dOL+3K+CfMB71jGb/z9KWzkD/6veVbnwMuqmBVN5RxnepH8ozNHhrLDJ9Z2Xd
+	    cifFB0SFXZljFAGXZs2NH9LlkzCasYhgmLSxkBz/zz6qKgUaWERF9Zvgkja/jMfO
+	    iavQUdOg+DKxTH1beDU3Aol1f7IOTTdnzNjbAABDe6VXsCphy7u7Aj8dWdfGDD9V
+	    NCNPCNcw2DAlSRmJHOXZLQJH2YLuY8HbY53KAVAzZrZQ/8tz7oKCQTKCY/jx8nt7
+	    fCEa6Z7W5/KgJ/eaWMb4KUkVkcPTWruz1X8P2GGBOjXJKL4XB1fQavi8HLFZyDc6
+	    ccv2QODlXT+KMunAURxJw7Pe/cVA1JDHrCTLlgwQ1nkGSl7vSytaVnuZrG1MAb5C
+	    azduzCvrq87L3kTuDFZzYTNAyxAwkMw3BxrD7QmDXhQY6IJldR5pWufarDtJBNwA
+	    vMvKT6BPo2P1nrP/cVpOsTY5+7hryO+/A2blM2ErOMHtYswyQ1kQtBnOibwXTW0V
+	    bd4FEBMy09Vuh0a6fFaramFtcCpQiKowJ+2a7QYQySi8Wl+y+iKvo7dKW7q9nHBj
+	    3VOgv424i2NsAmx3xw3VvHI4DX2HWVSu65QVqZbCqcHnbGNlv20wb+rIwkSSJtN1
+	    wakbqdkafs3WR4R+N7uYMpx4sI69FmXVwWnmNSru9ng3dNBLDPzBDBltoyQ5j8L2
+	    ud5WWApziitWURg9YR5wie1jsvWKyJG1oVE8OQ+ekzn89yPyYyLqzjzkksPZOwWA
+	    pBpWs6hwkTXuEeWqUz+MRhMq7r8yk59BaAgTcFc6z18MOyAGwCYZbM8U4OP/Fcay
+	    /ZZj89HSJY8Z/Qre/5EH5b1Hz3taTa4UwIbWOxJSSuhJP6MF4P9wyYwG6CjFLzz1
+	    4Rwzi66nmGiEHZNX3kN16zEeie8PrOyDqIQmz+h3C7n3SotYc2LYkJHrCPNYTAjs
+	    kjg6hOwrs00WNfSprRENuxf9/JcbeTJ9iLN9jwn12MoHQLOmxH4vEk3QVF0nSdIH
+	    iQFKAWiamw8DpVxoaDFoFoc8ABGJjokc6f90pDgNpi0XIxh/27aI1X/Su9cPLW3/
+	    vVScgV8HuRev3W7E0KwUkXVqR701E2CEoz7y5VYiEkTU9oicC2A2MpcsvmUDqIBr
+	    EvAkRyzGr0FW00cvic50iE1PlZyPA4MBVOk4z6KYpbEgNuO/Cyxgr80L14LnUMSx
+	    +ww80AinfqB8hBDZApLheXk7MpRFGuPd29ECDfnA3cWI9jRWGQdt6ZQ8NWkjmiUV
+	    oWjx8OIQzdkUTNtZLiSGWz6jMcnP8IyOUqOrN2qC2Yji340L17RyJNp49VYIZUhv
+	    vMT64WAEVTPsEFpaFDsuf4SPbv8cO/8OVbzdhho63wSb51fmufVZBiYESRTWE3hA
+	    -----END RSA PRIVATE KEY-----
+	
 
-The PRIVATE key encodes the public key also. The data format is
+1. The PRIVATE key encodes the public key also. The data format is
 PEM. You can store the data into a file.
 
-==> openssl genrsa  -out key.pem 2048 
+==> openssl genrsa  -out key.pem 2048
 
-    Generating RSA private key, 2048 bit long modulus (2 primes)
-    .............................................................+++++
-    ...+++++
-    e is 65537 (0x010001)
+		Generating RSA private key, 2048 bit long modulus (2 primes)
+		.............................................................+++++
+		...+++++
+		e is 65537 (0x010001)
 
 ==> ls -al
 
@@ -126,7 +127,7 @@ PEM. You can store the data into a file.
 
 
 
-See the details of the key in ASN.1 format.
+1. See the details of the key in ASN.1 format.
 
 ==> openssl  asn1parse  -inform pem -in key.pem
 
@@ -142,7 +143,7 @@ See the details of the key in ASN.1 format.
      1060:d=1  hl=3 l= 128 prim: INTEGER           :3904E46F110EB95162B1D4482C935667FBC67824DDE4E78C32157C3053A5827C660081B41EE6A0B13345A863631CB6E9CF55ECB24E7C31A03F4ECF3C57DF9E3E31A4C3E141A400F18734C117847156C713D1E0E2C2C9DAAE616236460CC337622B587C798BB6ADD7544E8C78B5FBD8713883655AE4D760DACFA35AFB711C46AA
 
 
-Get text equivalent of the RSA key.
+1. Get text equivalent of the RSA key.
 
 ==> openssl rsa -in key.pem -inform pem -noout -text
 
@@ -258,6 +259,7 @@ Get text equivalent of the RSA key.
 
 ##	Generate ECC key pair
 
+1. Generate ECC key pair
 ==> openssl ecparam -name prime256v1 -genkey -noout -out eckey.pem
 
 ==>  ls -al
@@ -347,7 +349,7 @@ This creates a file with the signature, named textfile.sha256.
 
     Verification Failure
 
-Signature is a binary. Convert to text format for easy transportation.
+1. Signature is a binary. Convert to text format for easy transportation.
 
 ==> base64 textfile.sha256.sign 
 

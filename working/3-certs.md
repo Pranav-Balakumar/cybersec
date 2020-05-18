@@ -135,18 +135,20 @@ already there in the CSR.
 
 How does the CA know that you are the organization you claim to be and
 verify that your key really is as defined in the CSR? This is an
-operational aspect. This is handled using “human” approaches or by
+operational question. This is handled using “human” approaches or by
 verifying the ownership of the domain or by checking against the
 person or … For websites, this mechanism is identified in the Baseline
 Requirements of the CA/Browser Forum.
+
+CAs can request proof of identity, and the ability to control the
+domain using DNS to modify DNS resource records.
 
 ##	Options for CSR
 There are many options for generating a CSR as described above. There
 are two ways to fill the CSR request.
 
-* Using openssl interactively as above is a
-manual approach. You have to interactively enter the
-information.
+* Using openssl interactively as above is a manual approach. You have
+to interactively enter the information.
 
 * Instead you can setup a config file to automate this
 process. Automation is important in order to regularly order new
@@ -199,12 +201,12 @@ www.google.com. Nobody should look at a self signed certificate and
 assume it is google.com.
 
 * Use a Certificate Authority to sign the certificate. CAs are trusted
-entities, who do validation of information and make sure you are
-Google Inc and you own the website www.google.com before signing and
-issuing the certificate. This is similar to public notary service.  CA
-signed certificates are needed to expose the service to the general
-public. You have to specify the validity of the certificate
-in terms of “Not Valid Before” and “Not Valid After”.
+entities, who validate the information and make sure you are Google
+Inc and you own the website www.google.com before signing and issuing
+the certificate. This is similar to public notary service.  CA signed
+certificates are needed to expose the service to the general
+public. You have to specify the validity of the certificate in terms
+of “Not Valid Before” and “Not Valid After”.
 
 ==> openssl x509 -req -days 365 -in cert.csr -signkey certkey.key -out cert.crt
 
@@ -330,6 +332,5 @@ use that as part of the certificate creation.
     Getting Private key
 
 
- TBD: not working
 
 
