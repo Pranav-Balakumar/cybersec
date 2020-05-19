@@ -40,17 +40,21 @@ Open up Firefox and go to http://localhost. You should see the basic nginx page.
 
 Go to https://localhost. You should not see any website there.
 
-## Copy keys into an accessible area
+## Copy keys into an accessible area. in this case we are choosing ../server
 
-==> mkdir /home/cybersecurity/certs/
-==> cp serverkey.key server-example.crt /home/cybersecurity/certs/
-==> chmod 400 /home/cybersecurity/certs/serverkey.key
+==> mkdir ../server/
+
+==> cp serverkey.key server-example.crt ../server/
+
+Note that the serverkey.key and server-example.crt come from the previous worksheet on signed server keys and certificates.
+
+==> chmod 400 ../server/serverkey.key
 
 Concatenate the intermediate sub-ca.crt into the server certificate.
 
-==> cat root-ca/sub-ca.crt >> /home/cybersecurity/certs/server-example.crt
+==> cat root-ca/sub-ca.crt >> ../server/server-example.crt
 
-==> ls -al /home/cybersecurity/certs/
+==> ls -al ../server
 
     total 20
     drwxr-xr-x  2 cybersecurity cybersecurity 4096 Jul  6 13:47 .
@@ -67,7 +71,8 @@ HTTPS server at port 443. Make the following changes in
 
 First back up nginx.conf
 
-==> sudo cp /etc/nginx/nginx.conf /home/cybersecurity/certs/nginx.conf
+==> sudo cp /etc/nginx/nginx.conf ./nginx.conf
+
 ==> sudo vi /etc/nginx/nginx.conf
 
 Add the following lines in the "http {..}" block, using the diff format
@@ -78,8 +83,8 @@ below.
         # SSL Settings
              	##
              
-            +        ssl_certificate     /home/cybersecurity/certs/server-example.crt;
-            +        ssl_certificate_key /home/cybersecurity/certs/serverkey.key;
+            +        ssl_certificate     <path>/server/server-example.crt;
+            +        ssl_certificate_key <path>/server/serverkey.key;
             +        ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
              	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
              	ssl_prefer_server_ciphers on;
