@@ -39,44 +39,104 @@
 2. openssl genrsa -aes128 2048: Generate the keys and encrypt them
    using aes128 with a password.
 
+		
+		$ openssl genrsa -aes128 -out enc-key.key
+		Generating RSA private key, 2048 bit long modulus
+		..+++
+		....................................+++
+		e is 65537 (0x10001)
+		Enter pass phrase for enc-key.key:
+		Verifying - Enter pass phrase for enc-key.key:
+		
+		$ cat enc-key.key
+		-----BEGIN RSA PRIVATE KEY-----
+		Proc-Type: 4,ENCRYPTED
+		DEK-Info: AES-128-CBC,C7E96E545C04EFEC75F134586922DE3E
+		
+		xv2IDMEgVY1/uDGW9lYVDU/FlE3fS3QPIVFAjGy/tJ8cY7Cg/EAA0UmofDgc6ZYg
+		zXBnvk5FLa24q56G3LVrJmt2jJFfqHdFkNnisXQ9ssXiOgAKwlBfBITOmtr5dzY4
+		ZHR/8zcUhnlKEdyeXI3LHjpCDr5o+0t+0C9eUlIZHOv3jPPAqpvuVW+hLc3dm6Y9
+		g33qRNMhzJXDTEDwosE8W4DweIVv5UyZKbNrnub4N0aDDLpGRWuyeewiw1iOytcI
+		8bwds3hfWyxDjgNr/GS69lnnE8/r/BRPKpp74d5ComOHHXpy5DHtOVLWB3IPDt6H
+		CETht465espKgC/5NMLn7aJLMmsgWIkuwLKVHQcVuZY38QdylBmNBD1cK+4svG34
+		mRVbBj9YrsvDUqa2PilQ7VjSvCiMkkNIc1De26tgvSRiucF0BV4l2se58nCkOho7
+		xmKb/v7sUgT2e3XycbuMU9f/mXHhsA+3V70CKYhkP+KKkU2bQCxfWKQUpqu8FBaM
+		bY5+g6vb33BvcKRKT7zErMcjbyd5B5PaDtqyk/2/ay0dWN4ezURqFcUP6dj40b79
+		0d+lwAg5hZJU9NNQjQjTP9Jj6gSsOo749Q88yzB9CEKzQpOzljROPy0t4JY8/BMJ
+		n55j82v1BCATNsUUw1uWWC6b5SEsMaAKiEJQD05Edg03tAtF1ZDIQTSA2WpX+1X7
+		MOP6+wuQdKqXsXyGPtTeX1xSAoX6APBogB/UE4IJh/4D7rBM4RHMnP7jbLMN4qgR
+		AphKJWiEgkZCIytCBMcoWuh4YxYXJuiLBnlnVE64FE0+xUM91gwgE64YuVqvoZNJ
+		DUlmQz/BkP2FdwkbL4TXwUZXDBYyTKISOCeyxNdK+A3O0FuDm9th17S4vGSU4GEP
+		EwXZI89R4SGBNZEGY8JRxdgmZfX/q5W1nzg69Mif8eZE8WGF5EBmGfMrvKAKUa1T
+		zj9eBjCK2ej1ih+Qpw5TmYWNVvPNN22d6flwMIYEiZUu/rLxl38kQdlOB+FuQwOl
+		/vyf26RdjURztaX3qhOiaXGDE/IUTA8ZYX2v/6mirbjZl8FmPCITeNP84iQkqbNS
+		RWACb3k45Pr6NodThP9FgD3e5hO2FX9ZstcxxYtt487Cr5pOxhO+2qFEuFaK48oZ
+		tnVtUUKiU2rhsJFFTNjUinhukakxUv7UxGfs0ofK6k8bMQU6UjSe1FIcTA5BbgYv
+		POEZPOAvuhp/9EheAPDV048QHrvhiZVy87z+HvMwpp7mZbvHMjlfgWGG+hv2LTlU
+		zsI1uHieZFLG8CC7/zX8L0XJX+KkVC8DZxJ4uKaAnciLg5WN0/zHBCuAQdVFVKUJ
+		ilXLkvPlVafNAGgkJ+YvYcNYCYyaIC+8nfPoiHmiliw0x+8ii7zxX5nObWtcAcjk
+		fSuexg7anaXXes5aWV/Nhbl6oYW75ZomoHNy2JGCM7XhhJnvnV/FP4GFWW+ZhtHD
+		mMUxv911G7ISWA2DtaTeO8kgj6rKXzj/SqpNOxU7JBbiDoVgQEYfTeVFqbYxflnb
+		BbuqA+K92s9kzcfT1laOLqG9QChUflVr9qWtfZ8EXvW+z+mijGo+7tI1p/RB4vcW
+		-----END RSA PRIVATE KEY-----
+		
 
-	    Generating RSA private key, 2048 bit long modulus (2 primes)
-	    .........................................................................+++++
-	    .......................................................+++++
-	    e is 65537 (0x010001)
-	    Enter pass phrase:
-	    Verifying - Enter pass phrase:
-	    -----BEGIN RSA PRIVATE KEY-----
-	    Proc-Type: 4,ENCRYPTED
-	    DEK-Info: AES-128-CBC,340F7B75AA2A289A828F7AC1E20DB68B
-	    
-	    xTxjUWV5xvlYKneT/XRif2Hj8s/xtJHPEjn4gt5ceKcfJdMNnVam1cWM96d+gS2W
-	    u8aDw5dT3zCSnLpQAMK5bhBTWWN3/pBktvRfDXLTo+PpJEYvCppTYhM42kb8Q4+y
-	    09jdFwPFHBHwy9a9nbR3Nlb0TIpwZgEQ0/dXX4GVyjfJe9cwxI4FTfSip58rrs8V
-	    e+5dOL+3K+CfMB71jGb/z9KWzkD/6veVbnwMuqmBVN5RxnepH8ozNHhrLDJ9Z2Xd
-	    cifFB0SFXZljFAGXZs2NH9LlkzCasYhgmLSxkBz/zz6qKgUaWERF9Zvgkja/jMfO
-	    iavQUdOg+DKxTH1beDU3Aol1f7IOTTdnzNjbAABDe6VXsCphy7u7Aj8dWdfGDD9V
-	    NCNPCNcw2DAlSRmJHOXZLQJH2YLuY8HbY53KAVAzZrZQ/8tz7oKCQTKCY/jx8nt7
-	    fCEa6Z7W5/KgJ/eaWMb4KUkVkcPTWruz1X8P2GGBOjXJKL4XB1fQavi8HLFZyDc6
-	    ccv2QODlXT+KMunAURxJw7Pe/cVA1JDHrCTLlgwQ1nkGSl7vSytaVnuZrG1MAb5C
-	    azduzCvrq87L3kTuDFZzYTNAyxAwkMw3BxrD7QmDXhQY6IJldR5pWufarDtJBNwA
-	    vMvKT6BPo2P1nrP/cVpOsTY5+7hryO+/A2blM2ErOMHtYswyQ1kQtBnOibwXTW0V
-	    bd4FEBMy09Vuh0a6fFaramFtcCpQiKowJ+2a7QYQySi8Wl+y+iKvo7dKW7q9nHBj
-	    3VOgv424i2NsAmx3xw3VvHI4DX2HWVSu65QVqZbCqcHnbGNlv20wb+rIwkSSJtN1
-	    wakbqdkafs3WR4R+N7uYMpx4sI69FmXVwWnmNSru9ng3dNBLDPzBDBltoyQ5j8L2
-	    ud5WWApziitWURg9YR5wie1jsvWKyJG1oVE8OQ+ekzn89yPyYyLqzjzkksPZOwWA
-	    pBpWs6hwkTXuEeWqUz+MRhMq7r8yk59BaAgTcFc6z18MOyAGwCYZbM8U4OP/Fcay
-	    /ZZj89HSJY8Z/Qre/5EH5b1Hz3taTa4UwIbWOxJSSuhJP6MF4P9wyYwG6CjFLzz1
-	    4Rwzi66nmGiEHZNX3kN16zEeie8PrOyDqIQmz+h3C7n3SotYc2LYkJHrCPNYTAjs
-	    kjg6hOwrs00WNfSprRENuxf9/JcbeTJ9iLN9jwn12MoHQLOmxH4vEk3QVF0nSdIH
-	    iQFKAWiamw8DpVxoaDFoFoc8ABGJjokc6f90pDgNpi0XIxh/27aI1X/Su9cPLW3/
-	    vVScgV8HuRev3W7E0KwUkXVqR701E2CEoz7y5VYiEkTU9oicC2A2MpcsvmUDqIBr
-	    EvAkRyzGr0FW00cvic50iE1PlZyPA4MBVOk4z6KYpbEgNuO/Cyxgr80L14LnUMSx
-	    +ww80AinfqB8hBDZApLheXk7MpRFGuPd29ECDfnA3cWI9jRWGQdt6ZQ8NWkjmiUV
-	    oWjx8OIQzdkUTNtZLiSGWz6jMcnP8IyOUqOrN2qC2Yji340L17RyJNp49VYIZUhv
-	    vMT64WAEVTPsEFpaFDsuf4SPbv8cO/8OVbzdhho63wSb51fmufVZBiYESRTWE3hA
-	    -----END RSA PRIVATE KEY-----
+	The public and private key can be obtained by decrypting with the
+    same password.
 	
+		$ openssl rsa -in enc-key.key -pubout
+		Enter pass phrase for enc-key.key:
+		writing RSA key
+		-----BEGIN PUBLIC KEY-----
+		MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzHDi8vSha0txsiIWzGBU
+		QFQkxUv14sH9X/+z6Dz8/CRBb/u7GkJYc7DbFLsoxBuYuYYGZvXhSIK/6vgEvLub
+		lreYnwmBM4S3BBbF3PdeCPfMoTEJTMWnWKkl4UxejLM/saCh97rtI2vQO4X5gd8F
+		XUqd//GzQE7XkCeLfDbdUlJExyk/YZGF/EisfVIiiT4F14DLyB+dRg2jjpQh7qAk
+		Mtxfbwv5fOGoYyIjbxPVWXx+gRqj/2+nzN3ieGGHrRS0o32mSdPHyprTp7QIlKWA
+		LjP4V8mig+p6NoXf0TLTW0EpsQNCTQwBe2DRUkshBu/MuJCUjb+lsxL1N74h9Vfz
+		MwIDAQAB
+		-----END PUBLIC KEY-----
+		
+
+		$openssl rsa -in enc-key.key
+		Enter pass phrase for enc-key.key:
+		writing RSA key
+		-----BEGIN RSA PRIVATE KEY-----
+		MIIEpAIBAAKCAQEAzHDi8vSha0txsiIWzGBUQFQkxUv14sH9X/+z6Dz8/CRBb/u7
+		GkJYc7DbFLsoxBuYuYYGZvXhSIK/6vgEvLublreYnwmBM4S3BBbF3PdeCPfMoTEJ
+		TMWnWKkl4UxejLM/saCh97rtI2vQO4X5gd8FXUqd//GzQE7XkCeLfDbdUlJExyk/
+		YZGF/EisfVIiiT4F14DLyB+dRg2jjpQh7qAkMtxfbwv5fOGoYyIjbxPVWXx+gRqj
+		/2+nzN3ieGGHrRS0o32mSdPHyprTp7QIlKWALjP4V8mig+p6NoXf0TLTW0EpsQNC
+		TQwBe2DRUkshBu/MuJCUjb+lsxL1N74h9VfzMwIDAQABAoIBAFw2LqdXH9e9V7L5
+		HT9h056QVWWINYfp59b9BrChkZpI4Bsad/IIKs1D4A0hvel2aRSFFy4piUujbd0V
+		sU1PcYYxmW1iZBxQqBv4CZb5HDj/TBUIgSFXpXugD63nPF5KG1iLE4MhlQR9BJdU
+		fo3NgiXqGgnvguJmrWQf8hI8zObr1iV+I5dwUjsNpcTWaGT63jxsxbYYRwE3uoWo
+		JyFlPcrHzCOBjzFXwIJt8qIRlw7vtDsZKO4R+x06rxv1wz2Z7c5IRz0Kj0PcUp0c
+		H8cO4D3UpD3yQ+lPzKBuKWGHFRbB+AVMhY7oo30rR73D52Yqe0Uwi0mL8nd+COrs
+		Wn0YwsECgYEA564V3a+mqArep92K/invkpjmNOkem8RVksc1oqxC2Es16jegauWm
+		gbtfO2Ix8I9RN+YzUtbM+jIC6SZinXXrbXu/L33GLRPbVMqoK3LcH04UDHbOsCvC
+		XLJBMbiudlsbPCkz4yeVoEdqIFaEFwo+bjfs/0QR1jlp97a8oZDqj60CgYEA4ebO
+		/Xa3TlwcWEvXGeGZYuZhe1dL2z/pSxF6g+NFQyzQutEtu7zuF6vcxj17e+QXbvkD
+		IkLMlYBW0GLKDx00Zyl+Hy1y/0HEf0RJ5hx2qSp9/VDQzn6B2rneeOOmdmB1nRl4
+		84U6FTf+IaDYzMrcuk4ZSl/+oPTo70rrbDfral8CgYBvMXAxK8KS2FSwwHWbMslW
+		1Kd4MYKNRBfGEHI/lummIcLInNYTOBFIJoO4XpKVYFOcvpFXatyKIEKhX9jotdW+
+		gCvsQTNCI0ubUICSCdh39eNNcCAXEYmBL9R2ZqrlByj1INlUZoU7ncrjpmJTJIl+
+		IL1Qbn0ZEgk36K5z5LePKQKBgQCJpXbIkJa/A3cuAgAuP/2Teqc5XYbWMIo5eIv7
+		YvcoKF2DB8RjGYrGF61tibb9VY1FzCsxrBw2mD3NufQ+41+z4F9+JdZlXLCbj4Or
+		1/oht8ePG7gvqnv7R7gcVzJt/PaNZCED2VD77uNFoFmZ5545Uy8r13QypSht7mum
+		xCgI5wKBgQCY5ittgKB71WUnKuHo0En9BB1X3DT13tq+a13O/JySA9N7IhAK2kXY
+		QGMDWBbsOvOVFAmW8UdUcMCXOHCDC4Q6NQgL6u9R2jxjCre+M9u4FIwPT9i+4h5U
+		PkZW2oXVVo0NBImEVf3F1M7eI5FNYghb1FzW28jSR4PvbQMm9laNNg==
+		-----END RSA PRIVATE KEY-----
+		
+	Incorrect password will result in error.
+	
+		openssl rsa -in enc-key.key -pubout
+		Enter pass phrase for enc-key.key:
+		unable to load Private Key
+		4643425900:error:06FFF064:digital envelope routines:CRYPTO_internal:bad decrypt:/AppleInternal/BuildRoot/Library/Caches/com.apple.xbs/Sources/libressl/libressl-47.100.4/libressl-2.8/crypto/evp/evp_enc.c:521:
+		4643425900:error:09FFF065:PEM routines:CRYPTO_internal:bad decrypt:/AppleInternal/BuildRoot/Library/Caches/com.apple.xbs/Sources/libressl/libressl-47.100.4/libressl-2.8/crypto/pem/pem_lib.c:469:	
+		
 
 1. The PRIVATE key encodes the public key also. The data format is
 PEM. You can store the data into a file.
