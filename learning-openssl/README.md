@@ -1,12 +1,12 @@
 # Hello
-This repository contains useful instructions on how to use OpenSSL for different operations. The working directory contains files numbered 1-5, which contain instructions on these topics.
+This repository contains (hopefully, useful) instructions on how to use OpenSSL for different operations. This directory contains directories numbered 1-5, which contain instructions on these topics.
 
 1. OpenSSL Basics
 
-2. OpenSSL Keys
+2. Keys, Encryption, Decryption, Sign and Verify
 
-3. OpenSSL Certificates
+3. Certificates
 
-4. OpenSSL Running a CA
+4. Certificate Hierarchies and Running an OpenSSL based CA
 
 5. Using certificates with NGINX based local webserver
