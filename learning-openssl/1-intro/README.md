@@ -1,12 +1,27 @@
 # Table of Contents
 -   [Introduction to Openssl](#introduction-to-openssl)
     -   [Different cli options](#different-cli-options)
+        -   [openssl version -a](#openssl-version--a)
+        -   [openssl help](#openssl-help)
+        -   [openssl rsa -help](#openssl-rsa--help)
+        -   [openssl x509 -help](#openssl-x509--help)
+        -   [openssl aes128](#openssl-aes128)
+        -   [openssl dgst -help](#openssl-dgst--help)
+        -   [openssl dgst file](#openssl-dgst-file)
+        -   [openssl sha512 file](#openssl-sha512-file)
+        -   [openssl sha512 -out file.hash
+            file](#openssl-sha512--out-filehash-file)
+        -   [openssl rand 100](#openssl-rand-100)
+        -   [openssl rand -base64 100](#openssl-rand--base64--100)
+        -   [openssl genrsa -help](#openssl-genrsa--help)
+        -   [openssl gendsa -help](#openssl-gendsa--help)
+
 #	Introduction to Openssl
 This section provides an introduction to OpenSSL, a key software for performing cryptographic operations.
 
 ##	Different cli options
 
-1. openssl version -a
+### openssl version -a
 
 	    OpenSSL 1.1.1b  26 Feb 2019
 	    built on: Wed Apr  3 10:50:23 2019 UTC
@@ -17,7 +32,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    ENGINESDIR: "/usr/lib/x86_64-linux-gnu/engines-1.1"
 	    Seeding source: os-specific
 
-1. openssl help
+### openssl help
 
 	    Standard commands
 	    asn1parse         ca                ciphers           cms               
@@ -62,7 +77,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    seed-ecb          seed-ofb          sm4-cbc           sm4-cfb           
 	    sm4-ctr           sm4-ecb           sm4-ofb
 
-1.  openssl rsa -help
+### openssl rsa -help
 
 	    Usage: rsa [options]
 	    Valid options are:
@@ -87,7 +102,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -pvk-none          Don't enforce PVK encoding
 	     -engine val        Use engine, possibly a hardware device
 
-1. openssl x509 -help
+### openssl x509 -help
 
 	    Usage: x509 [options]
 	    Valid options are:
@@ -159,7 +174,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -engine val           Use engine, possibly a hardware device
 	     -preserve_dates       preserve existing dates when signing
 
-1. openssl aes128
+### openssl aes128
 
 	    enter aes-128-cbc encryption password:
 	    Verifying - enter aes-128-cbc encryption password:
@@ -169,7 +184,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    Salted__Q�!R���G�A�i����0�����A�h���>	���u�I�����n��z�0"m}%                                                                                                                                               
 
 
-1. openssl dgst -help
+### openssl dgst -help
 
 	    Usage: dgst [options] [file...]
 	      file... files to digest (default is stdin)
@@ -199,16 +214,16 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -engine_impl        Also use engine given by -engine for digest operations
 
 
-1. openssl dgst file
+### openssl dgst file
 
 			SHA256(file)= 9d63c3b5b7623d1fa3dc7fd1547313b9546c6d0fbbb6773a420613b7a17995c8
 
 
-1. openssl sha512 file
+### openssl sha512 file
 
 		SHA512(file)= 62f1c73922ba448579d9229f932e747c23d53400a6fb826c6ea5f478247420c62b681cd636840e0ae8556bcde856a24c0123c501aa3967c42530e3be8cb6de75
 
-1. openssl sha512 -out file.hash file
+### openssl sha512 -out file.hash file
 
 	==> ls -al
 
@@ -223,20 +238,20 @@ This section provides an introduction to OpenSSL, a key software for performing 
 		SHA512(file)= 62f1c73922ba448579d9229f932e747c23d53400a6fb826c6ea5f478247420c62b681cd636840e0ae8556bcde856a24c0123c501aa3967c42530e3be8cb6de75
 
 
-1. openssl rand 100
+### openssl rand 100
 
 		�����yT�E.k���ѡ�哹��7�|��܀�W�_Y��~�֨�K	Q���e�;��@Ti�!�
                                                            &䕤�nt^|����
                                                                        c�A%
 
-1. openssl rand -base64  100
+### openssl rand -base64  100
 
 		gVsU+iVzEkYBgbmALqLV5a7Z9HlPWqVZABPt/fhvFLH6N3ZBM64wDxBCK9wc5Dwa
 		9TOiSC+OVbBwzmwKiSv0uCyGd7lpzoxI7p7aX5UbrlG4Tc3gk8HWvPIH5ie6MJS7
 		Q1896w==
 
 
-1. openssl genrsa -help
+### openssl genrsa -help
 
 	    Usage: genrsa [options]
 	    Valid options are:
@@ -253,7 +268,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -primes +int        Specify number of primes
 
 
-1. openssl gendsa -help
+### openssl gendsa -help
 
 	    Usage: gendsa [args] dsaparam-file
 	    Valid options are:

@@ -1,6 +1,9 @@
 # Table of Contents
 -   [Running a webserver with SSL](#running-a-webserver-with-ssl)
     -   [Start nginx](#start-nginx)
+    -   [Copy keys into an accessible area. in this case we are choosing
+        ../server](#copy-keys-into-an-accessible-area-in-this-case-we-are-choosing-server)
+    -   [Modify /etc/nginx/nginx.conf](#modify-etcnginxnginxconf)
     -   [Verify nginx configuration and reload
         nginx](#verify-nginx-configuration-and-reload-nginx)
     -   [Green Lock Or Not!!](#green-lock-or-not)
@@ -126,7 +129,7 @@ Now go to http://localhost and verify that the website still works.
 Now go to https://localhost. You will notice that Firefox gives an
 error. Why?
 
-## Green Lock Or Not
+## Green Lock Or Not!!
 
 Click on Advanced. Now open the certificate shown. Verify that the
 certificate matches the server-example.crt info.
