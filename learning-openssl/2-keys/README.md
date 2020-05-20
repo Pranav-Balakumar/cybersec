@@ -1,3 +1,15 @@
+# Table of Contents
+-   [Key Pair Usage - hands on](#key-pair-usage---hands-on)
+    -   [Generate RSA key pair](#generate-rsa-key-pair)
+    -   [Generate ECC key pair](#generate-ecc-key-pair)
+    -   [PEM vs DER and other formats](#pem-vs-der-and-other-formats)
+    -   [Sign and verify using keys](#sign-and-verify-using-keys)
+        -   [Sign](#sign)
+        -   [Verify Good File](#verify-good-file)
+        -   [Verify Bad File](#verify-bad-file)
+    -   [Encrypt and Decrypt using keys](#encrypt-and-decrypt-using-keys)
+        -   [Encryption](#encryption)
+        -   [Decryption](#decryption)
 #	Key Pair Usage - hands on
 ##	Generate RSA key pair
 
@@ -49,7 +61,7 @@
 	    -----BEGIN RSA PRIVATE KEY-----
 	    Proc-Type: 4,ENCRYPTED
 	    DEK-Info: AES-128-CBC,340F7B75AA2A289A828F7AC1E20DB68B
-	    
+
 	    xTxjUWV5xvlYKneT/XRif2Hj8s/xtJHPEjn4gt5ceKcfJdMNnVam1cWM96d+gS2W
 	    u8aDw5dT3zCSnLpQAMK5bhBTWWN3/pBktvRfDXLTo+PpJEYvCppTYhM42kb8Q4+y
 	    09jdFwPFHBHwy9a9nbR3Nlb0TIpwZgEQ0/dXX4GVyjfJe9cwxI4FTfSip58rrs8V
@@ -76,7 +88,7 @@
 	    oWjx8OIQzdkUTNtZLiSGWz6jMcnP8IyOUqOrN2qC2Yji340L17RyJNp49VYIZUhv
 	    vMT64WAEVTPsEFpaFDsuf4SPbv8cO/8OVbzdhho63wSb51fmufVZBiYESRTWE3hA
 	    -----END RSA PRIVATE KEY-----
-	
+
 
 1. The PRIVATE key encodes the public key also. The data format is
 PEM. You can store the data into a file.
@@ -351,7 +363,7 @@ This creates a file with the signature, named textfile.sha256.
 
 1. Signature is a binary. Convert to text format for easy transportation.
 
-==> base64 textfile.sha256.sign 
+==> base64 textfile.sha256.sign
 
     UuTfZRlswom7eG6qB8o5zUiBg5DyURdqAW/lAUMQjnk0Eubuf1ZOdvA+j6g7qf1JLzFJ1H906VRX
     jmN+LiSUvKrv3W/kwQBVsDw1+I0gXSK3J3IOH2yG9KkAzE/0SoQNc8fDwrmU68NVB78Bwdil8e44
@@ -361,7 +373,7 @@ This creates a file with the signature, named textfile.sha256.
 
 Hexdump of signature
 
-==> hexdump textfile.sha256.sign 
+==> hexdump textfile.sha256.sign
 
     0000000 e452 65df 6c19 89c2 78bb aa6e ca07 cd39
     0000010 8148 9083 51f2 6a17 6f01 01e5 1043 798e
@@ -411,7 +423,7 @@ decrypt data.
     �Ht���#P����щ��r�3��w1[��?�V �El[q���4�+&��Y@�gd�.�ɶ�h�Q�6�<��
                                                                   ��	��\��~�b<��\b��*�3�%J�s�qj��&�(�ʋ:�GX��R
                                                                                                                     )@p����8�A��TW	��o��ږ�I���aT<$L@��}���,qM�2N�����%��/8��%UT��!�f��&
-    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                    ==> base64 textfile.enc 
+    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                    ==> base64 textfile.enc
 
     p3sI4ZIDREcPi7J2i75IZ75pXjjzgHkKjwVIdKmcvSNQ4K7YzdXRianOcvKXM62RdzEYW4GoP59W
     IM1FbFtxzOHjNJArJgEPlhfKWUCHZ2QcrhEu7Mm272iUUcsHNpA8/4ALnqgHCfodgFyt534DimI8
@@ -424,4 +436,3 @@ decrypt data.
 ==> openssl rsautl -in textfile.enc -inkey key.pem -decrypt        
 
     This is a test file"
-

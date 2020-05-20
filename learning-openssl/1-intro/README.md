@@ -1,3 +1,6 @@
+# Table of Contents
+-   [Introduction to Openssl](#introduction-to-openssl)
+    -   [Different cli options](#different-cli-options)
 #	Introduction to Openssl
 This section provides an introduction to OpenSSL, a key software for performing cryptographic operations.
 
@@ -8,7 +11,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    OpenSSL 1.1.1b  26 Feb 2019
 	    built on: Wed Apr  3 10:50:23 2019 UTC
 	    platform: debian-amd64
-	    options:  bn(64,64) rc4(16x,int) des(int) blowfish(ptr) 
+	    options:  bn(64,64) rc4(16x,int) des(int) blowfish(ptr)
 	    compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -Wall -Wa,--noexecstack -g -O2 -fdebug-prefix-map=/build/openssl-uEA50R/openssl-1.1.1b=. -fstack-protector-strong -Wformat -Werror=format-security -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPADLOCK_ASM -DPOLY1305_ASM -DNDEBUG -Wdate-time -D_FORTIFY_SOURCE=2
 	    OPENSSLDIR: "/usr/lib/ssl"
 	    ENGINESDIR: "/usr/lib/x86_64-linux-gnu/engines-1.1"
@@ -29,14 +32,14 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    s_server          s_time            sess_id           smime             
 	    speed             spkac             srp               storeutl          
 	    ts                verify            version           x509              
-	    
+
 	    Message Digest commands (see the `dgst' command for more details)
 	    blake2b512        blake2s256        gost              md4               
 	    md5               rmd160            sha1              sha224            
 	    sha256            sha3-224          sha3-256          sha3-384          
 	    sha3-512          sha384            sha512            sha512-224        
 	    sha512-256        shake128          shake256          sm3               
-	    
+
 	    Cipher commands (see the `enc' command for more details)
 	    aes-128-cbc       aes-128-ecb       aes-192-cbc       aes-192-ecb       
 	    aes-256-cbc       aes-256-ecb       aria-128-cbc      aria-128-cfb      
@@ -58,7 +61,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    rc4-40            seed              seed-cbc          seed-cfb          
 	    seed-ecb          seed-ofb          sm4-cbc           sm4-cfb           
 	    sm4-ctr           sm4-ecb           sm4-ofb
-	
+
 1.  openssl rsa -help
 
 	    Usage: rsa [options]
@@ -155,8 +158,8 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -issuer_hash_old      Print old-style (MD5) subject hash value
 	     -engine val           Use engine, possibly a hardware device
 	     -preserve_dates       preserve existing dates when signing
-	
-1. openssl aes128 
+
+1. openssl aes128
 
 	    enter aes-128-cbc encryption password:
 	    Verifying - enter aes-128-cbc encryption password:
@@ -248,7 +251,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -*                  Encrypt the output with any supported cipher
 	     -engine val         Use engine, possibly a hardware device
 	     -primes +int        Specify number of primes
-	
+
 
 1. openssl gendsa -help
 
@@ -261,5 +264,3 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -writerand outfile  Write random data to the specified file
 	     -*                  Encrypt the output with any supported cipher
 	     -engine val         Use engine, possibly a hardware device
-	
-

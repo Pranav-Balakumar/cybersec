@@ -1,3 +1,11 @@
+# Table of Contents
+-   [Running a webserver with SSL](#running-a-webserver-with-ssl)
+    -   [Start nginx](#start-nginx)
+    -   [Verify nginx configuration and reload
+        nginx](#verify-nginx-configuration-and-reload-nginx)
+    -   [Green Lock Or Not!!](#green-lock-or-not)
+
+
 # Running a webserver with SSL
 
 Now we will use our new certificate to run a HTTPS server.
@@ -82,7 +90,7 @@ below.
 
         # SSL Settings
              	##
-             
+
             +        ssl_certificate     <path>/server/server-example.crt;
             +        ssl_certificate_key <path>/server/serverkey.key;
             +        ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
@@ -91,16 +99,16 @@ below.
 
 * Start HTTPS server: The below lines start SSL server at port 443 and
   provide a servername
-     
+
         include /etc/nginx/conf.d/*.conf;
              	include /etc/nginx/sites-enabled/*;
-             
+
             +	server {
             +    		listen              443 ssl default_server;
             +    		listen              [::]:443 ssl default_server ;
             +	}
              }
-     
+
 ## Verify nginx configuration and reload nginx
 
 Verify configuration
@@ -118,7 +126,7 @@ Now go to http://localhost and verify that the website still works.
 Now go to https://localhost. You will notice that Firefox gives an
 error. Why?
 
-## Green Lock Or Not!!
+## Green Lock Or Not
 
 Click on Advanced. Now open the certificate shown. Verify that the
 certificate matches the server-example.crt info.
@@ -133,4 +141,3 @@ for more information.
 
 The lock tells you that the connection is not secure and gives you the
 opportunity to remove the exception you added.
-
