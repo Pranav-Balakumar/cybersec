@@ -1,3 +1,11 @@
+# Table of Contents
+-   [Certificate](#certificate)
+    -   [Create Key Pair](#create-key-pair)
+    -   [Create CSR](#create-csr)
+    -   [Options for CSR](#options-for-csr)
+    -   [Self-sign certificate](#self-sign-certificate)
+    -   [Extensions](#extensions)
+
 #	Certificate
 
 Certificate Signing Requests are formal requests asking a CA to sign a
@@ -62,8 +70,8 @@ a password if you would like to.
     Organization Name (eg, company) [Internet Widgits Pty Ltd]:My Cool Company Ltd
     Organizational Unit Name (eg, section) []:Finance
     Common Name (e.g. server FQDN or YOUR name) []:www.coolcompany.example
-    Email Address []:admin@coolcompany.example 
-    
+    Email Address []:admin@coolcompany.example
+
     Please enter the following 'extra' attributes
     to be sent with your certificate request
     A challenge password []:
@@ -161,8 +169,8 @@ request generation and pass that config file to the openssl.
 ==> cat csr.cnf
 
     [req]
-    prompt = no 
-    distinguished_name = dn 
+    prompt = no
+    distinguished_name = dn
     [dn]
     CN = www.coolcompany.example
     emailAddress = admin@coolcompany.example
@@ -330,7 +338,3 @@ use that as part of the certificate creation.
     Signature ok
     subject=C = IN, ST = Tamil Nadu, L = Chennai, O = My Cool Company Ltd, OU = Finance, CN = www.coolcompany.example, emailAddress = admin@coolcompany.example
     Getting Private key
-
-
-
-

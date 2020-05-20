@@ -1,3 +1,15 @@
+# Table of Contents
+-   [Certificate Hierarchy](#certificate-hierarchy)
+    -   [Setup a CA](#setup-a-ca)
+    -   [Create Sub-CA](#create-sub-ca)
+    -   [Create server certificates](#create-server-certificates)
+    -   [Create Client Certificate](#create-client-certificate)
+    -   [Verify client and server
+        certificates](#verify-client-and-server-certificates)
+    -   [Launch client and server](#launch-client-and-server)
+    -   [Looking up Services](#looking-up-services)
+    -   [The Green Lock Test](#the-green-lock-test)
+
 #	Certificate Hierarchy
 Root certificates / self-signed certificates are not usually used in any application. CAs must provide certificates after due validation of identity.
 
@@ -36,7 +48,7 @@ configuration details.
     .............................................................................................................................................................++++
     ...........................................................................................................++++
     writing new private key to 'private/root-ca.key'
-    
+
 ==> ls -al
 
     total 32
@@ -102,7 +114,7 @@ Look at "requested extensions"
                     CA:TRUE
                 X509v3 Key Usage: critical
                     Certificate Sign, CRL Sign
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     BB:6D:80:20:31:B4:7D:C1:8D:7B:4F:EE:E2:01:F2:91:DF:09:38:08
         Signature Algorithm: sha256WithRSAEncryption
              d2:12:b7:35:4a:cb:73:ee:19:66:b6:7d:8c:86:ac:16:4e:c4:
@@ -204,12 +216,12 @@ Create certificate from the CSR and self sign the certificate.
                     CA:TRUE
                 X509v3 Key Usage: critical
                     Certificate Sign, CRL Sign
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     BB:6D:80:20:31:B4:7D:C1:8D:7B:4F:EE:E2:01:F2:91:DF:09:38:08
     Certificate is to be certified until Jun 12 06:33:26 2029 GMT (3650 days)
     Sign the certificate? [y/n]:y
-    
-    
+
+
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
@@ -242,7 +254,7 @@ Create certificate from the CSR and self sign the certificate.
     -rw-r--r-- 1 cybersecurity cybersecurity    0 Jun 15 11:41 index.old
     -rw-r--r-- 1 cybersecurity cybersecurity   33 Jun 15 12:04 serial
     -rw-r--r-- 1 cybersecurity cybersecurity   33 Jun 15 11:41 serial.old
-    
+
 ==> ls -al certs
 
 
@@ -266,7 +278,7 @@ Look at sub-ca.conf, also in root-ca directory.
     ..............++++
     ............................................................................................++++
     writing new private key to 'private/sub-ca.key'
-    
+
 ==> ls -al private
 
     total 16
@@ -274,7 +286,7 @@ Look at sub-ca.conf, also in root-ca directory.
     drwxr-xr-x 5 cybersecurity cybersecurity 4096 Jun 15 12:41 ..
     -rw------- 1 cybersecurity cybersecurity 3272 Jun 15 12:02 root-ca.key
     -rw------- 1 cybersecurity cybersecurity 3272 Jun 15 12:41 sub-ca.key
-    
+
 ==>  openssl req -noout -text -in sub-ca.csr
 
     Certificate Request:
@@ -327,7 +339,7 @@ Look at sub-ca.conf, also in root-ca directory.
                     CA:TRUE
                 X509v3 Key Usage: critical
                     Certificate Sign, CRL Sign
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
         Signature Algorithm: sha256WithRSAEncryption
              1c:6c:99:89:f8:31:03:66:f2:4f:26:01:c2:db:bb:82:27:1d:
@@ -359,7 +371,7 @@ Look at sub-ca.conf, also in root-ca directory.
              18:69:6d:6c:7f:99:f2:ed:32:65:37:78:10:70:f8:7a:6b:53:
              b2:78:e2:23:78:c2:b3:db:87:9e:9e:cc:21:00:c3:ce:7b:91:
              bd:99:19:ab:23:13:9f:5d
-    
+
 ==> openssl ca -config root-ca.conf -in sub-ca.csr -out sub-ca.crt -extensions sub_ca_ext
 
 
@@ -424,38 +436,38 @@ Look at sub-ca.conf, also in root-ca directory.
                         b3:7f:25
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
-                Authority Information Access: 
+                Authority Information Access:
                     CA Issuers - URI:http://root-ca.example.com/root-ca.cr
                     OCSP - URI:http://ocsp.root-ca.example.com:9080
-    
-                X509v3 Authority Key Identifier: 
+
+                X509v3 Authority Key Identifier:
                     keyid:BB:6D:80:20:31:B4:7D:C1:8D:7B:4F:EE:E2:01:F2:91:DF:09:38:08
-    
+
                 X509v3 Basic Constraints: critical
                     CA:TRUE, pathlen:0
-                X509v3 CRL Distribution Points: 
-    
+                X509v3 CRL Distribution Points:
+
                     Full Name:
                       URI:http://root-ca.example.com/root-ca.crl
-    
-                X509v3 Extended Key Usage: 
+
+                X509v3 Extended Key Usage:
                     TLS Web Client Authentication, TLS Web Server Authentication
                 X509v3 Key Usage: critical
                     Certificate Sign, CRL Sign
-                X509v3 Name Constraints: 
+                X509v3 Name Constraints:
                     Permitted:
                       DNS:example.com
                       DNS:example.org
                     Excluded:
                       IP:0.0.0.0/0.0.0.0
                       IP:0:0:0:0:0:0:0:0/0:0:0:0:0:0:0:0
-    
-                X509v3 Subject Key Identifier: 
+
+                X509v3 Subject Key Identifier:
                     DD:C4:4A:9E:ED:9B:87:2A:56:E0:FB:8C:6C:F5:C1:2C:79:D3:26:97
     Certificate is to be certified until Jun 12 07:18:31 2029 GMT (3650 days)
     Sign the certificate? [y/n]:y
-    
-    
+
+
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
@@ -479,7 +491,7 @@ Look at sub-ca.conf, also in root-ca directory.
 
     2D0FE5F0004477C3E0318DBA1807C8BD
 
-==> cat db/serial.old 
+==> cat db/serial.old
 
     2D0FE5F0004477C3E0318DBA1807C8BC
 
@@ -516,7 +528,7 @@ this in the root-ca folder since they are not managed by the
 CA. Instead they are managed by the user/application/customer.
 
 ==> cd cert-hier
-	
+
 ==> openssl genrsa -out serverkey.key
 
     Generating RSA private key, 2048 bit long modulus (2 primes)
@@ -527,7 +539,7 @@ CA. Instead they are managed by the user/application/customer.
 ==> openssl rsa  -pubout -out serverpubkey.key -in serverkey.key
 
     writing RSA key
-    
+
 ==> ls -al
 
     total 20
@@ -594,7 +606,7 @@ Get Server certificate issued by the SubCA.
 
 ==> cd root-ca
 
-==> openssl ca -config sub-ca.conf -in ../server-coolcompany.csr -out ../server-coolcompany.crt -extensions server_ext 
+==> openssl ca -config sub-ca.conf -in ../server-coolcompany.csr -out ../server-coolcompany.crt -extensions server_ext
 
     Using configuration from sub-ca.conf
     Check that the request matches the signature
@@ -721,30 +733,30 @@ Now switch to the CA and issue the certificate
                         a5:c3
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
-                Authority Information Access: 
+                Authority Information Access:
                     CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
-    
-                X509v3 Authority Key Identifier: 
+
+                X509v3 Authority Key Identifier:
                     keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
-    
+
                 X509v3 Basic Constraints: critical
                     CA:FALSE
-                X509v3 CRL Distribution Points: 
-    
+                X509v3 CRL Distribution Points:
+
                     Full Name:
                       URI:http://sub-ca.example.com/sub-ca.crl
-    
-                X509v3 Extended Key Usage: 
+
+                X509v3 Extended Key Usage:
                     TLS Web Client Authentication
                 X509v3 Key Usage: critical
                     Digital Signature
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     B2:45:C4:C7:2A:FC:0E:55:10:7B:90:67:06:DE:C4:12:CF:C5:D5:A7
     Certificate is to be certified until Jul  3 16:31:49 2020 GMT (365 days)
     Sign the certificate? [y/n]:y
-    
-    
+
+
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
@@ -810,25 +822,25 @@ Look at the certificate and verify everything looks good.
                         a5:c3
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
-                Authority Information Access: 
+                Authority Information Access:
                     CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
-    
-                X509v3 Authority Key Identifier: 
+
+                X509v3 Authority Key Identifier:
                     keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
-    
+
                 X509v3 Basic Constraints: critical
                     CA:FALSE
-                X509v3 CRL Distribution Points: 
-    
+                X509v3 CRL Distribution Points:
+
                     Full Name:
                       URI:http://sub-ca.example.com/sub-ca.crl
-    
-                X509v3 Extended Key Usage: 
+
+                X509v3 Extended Key Usage:
                     TLS Web Server Authentication
                 X509v3 Key Usage: critical
                     Digital Signature, Key Encipherment
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     B2:45:C4:C7:2A:FC:0E:55:10:7B:90:67:06:DE:C4:12:CF:C5:D5:A7
         Signature Algorithm: sha256WithRSAEncryption
              a2:d5:43:f8:e5:eb:91:de:7e:d7:c9:74:f1:81:13:34:a7:39:
@@ -950,30 +962,30 @@ SubCA has to issue certificate
                         56:b2:e9
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
-                Authority Information Access: 
+                Authority Information Access:
                     CA Issuers - URI:http://sub-ca.example.com/sub-ca.crt
                     OCSP - URI:http://ocsp.sub-ca.example.com:9081
-    
-                X509v3 Authority Key Identifier: 
+
+                X509v3 Authority Key Identifier:
                     keyid:07:CE:A9:EE:BA:4B:86:F2:F4:79:05:37:99:59:DD:F3:43:A2:DE:AC
-    
+
                 X509v3 Basic Constraints: critical
                     CA:FALSE
-                X509v3 CRL Distribution Points: 
-    
+                X509v3 CRL Distribution Points:
+
                     Full Name:
                       URI:http://sub-ca.example.com/sub-ca.crl
-    
-                X509v3 Extended Key Usage: 
+
+                X509v3 Extended Key Usage:
                     TLS Web Client Authentication, TLS Web Server Authentication
                 X509v3 Key Usage: critical
                     Digital Signature, Key Encipherment
-                X509v3 Subject Key Identifier: 
+                X509v3 Subject Key Identifier:
                     03:4A:E1:F8:93:95:3A:47:BB:BF:EC:16:4A:66:F6:3A:E3:C1:DB:AE
     Certificate is to be certified until Jul  3 16:41:36 2020 GMT (365 days)
     Sign the certificate? [y/n]:y
-    
-    
+
+
     1 out of 1 certificate requests certified, commit? [y/n]y
     Write out database with 1 new entries
     Data Base Updated
@@ -1038,7 +1050,7 @@ chain into a single file.
 
     Subject: C=IN, O=Example, CN=Example.com
     Subject Public Key Info:
-        X509v3 Subject Key Identifier: 
+        X509v3 Subject Key Identifier:
     Subject: C=IN, O=Example, CN=Example SubCA
     Subject Public Key Info:
         X509v3 Subject Key Identifier:
@@ -1112,7 +1124,7 @@ Lets terminate the client (hit ^C) and use the chain as the truststore.
 ==> openssl s_client -CAfile ca-chain.crt
 
 The certificate chain is now verified fine, but there is another
-error. We will not look 
+error. We will not look
 
     CONNECTED(00000003)
     depth=2 C = IN, O = Example, CN = Example.com
@@ -1160,9 +1172,9 @@ error. We will not look
     AKuIvPTcVBHkbk6iYo0WUf5Y6P6g+JK7cCBOdFTB9QPdRCp7s9vETGjzV6Pq
     -----END CERTIFICATE-----
     subject=C = IN, ST = Tamil Nadu, O = Example, OU = Finance, CN = 127.0.0.1, emailAddress = admin@coolcompany.example
-    
+
     issuer=C = IN, O = Example, CN = Example SubCA
-    
+
     ---
     No client certificate CA names sent
     Peer signing digest: SHA256
@@ -1187,7 +1199,7 @@ error. We will not look
         Protocol  : TLSv1.3
         Cipher    : TLS_AES_256_GCM_SHA384
         Session-ID: 15B2DD6D76BABE5AF375961EE0C40F7A9DBBB6FE6F811530BE23D6C97FEC01D2
-        Session-ID-ctx: 
+        Session-ID-ctx:
         Resumption PSK: AC5045E1554082E795CE6107712E1C01943182F29A2B7FCD76E44D4C9595D053FF4243E996039768F16E7C9CADFB1696
         PSK identity: None
         PSK identity hint: None
@@ -1207,7 +1219,7 @@ error. We will not look
         00a0 - c7 16 51 51 f4 1b 07 e0-f8 29 2b 08 40 94 b0 9a   ..QQ.....)+.@...
         00b0 - 9a e6 3e 77 74 7e 30 09-3e 1c fd b0 96 45 c6 e1   ..>wt~0.>....E..
         00c0 - 3e 1c 38 43 1f 95 c2 59-71 6f 40 62 54 c0 18 8f   >.8C...Yqo@bT...
-    
+
         Start Time: 1562260669
         Timeout   : 7200 (sec)
         Verify return code: 0 (ok)
@@ -1221,7 +1233,7 @@ error. We will not look
         Protocol  : TLSv1.3
         Cipher    : TLS_AES_256_GCM_SHA384
         Session-ID: 55EF5206942344ED00C65638750230EC64FC29489D21A4EE549C5F5BC63F4D29
-        Session-ID-ctx: 
+        Session-ID-ctx:
         Resumption PSK: E990FDF5EAEB48300379B4A8E5B44FB0DBE62D7BD3D81A8193167689F28FA70A26EDD9CC3586DBE9EC763894F7A9A002
         PSK identity: None
         PSK identity hint: None
@@ -1241,7 +1253,7 @@ error. We will not look
         00a0 - 94 e4 a6 70 35 ac 46 88-7e 58 dc fc 46 fa 95 05   ...p5.F.~X..F...
         00b0 - 76 00 5b ce a1 0b 0d ac-a9 67 df 75 2f 5e 2f 68   v.[......g.u/^/h
         00c0 - ef dd d2 ee e9 62 c9 e6-f5 47 0b 5e 95 db d0 75   .....b...G.^...u
-    
+
         Start Time: 1562260669
         Timeout   : 7200 (sec)
         Verify return code: 0 (ok)
@@ -1252,7 +1264,7 @@ error. We will not look
 
 
 You can now type anything you want and see the messages going
-through. 
+through.
 
 You can also have separate certificates for the client and this will
 be sent to the server as well.
@@ -1304,9 +1316,9 @@ browser to confirm the certificate used.
     yEUcGFEfuhlMf7MGE9jeUOsSHA==
     -----END CERTIFICATE-----
     subject=C = US, ST = California, L = Mountain View, O = Google LLC, CN = www.google.com
-    
+
     issuer=C = US, O = Google Trust Services, CN = Google Internet Authority G3
-    
+
     ---
     No client certificate CA names sent
     Peer signing digest: SHA256
@@ -1399,9 +1411,9 @@ Yahoo:
     ThR/tNqj9qhqwdtKQKNYEhyQNipodImwdKGcDIOC77cgj/A=
     -----END CERTIFICATE-----
     subject=C = US, ST = California, L = Sunnyvale, O = Oath Inc, CN = *.www.yahoo.com
-    
+
     issuer=C = US, O = DigiCert Inc, OU = www.digicert.com, CN = DigiCert SHA2 High Assurance Server CA
-    
+
     ---
     No client certificate CA names sent
     Peer signing digest: SHA512
@@ -1421,7 +1433,7 @@ Yahoo:
         Protocol  : TLSv1.2
         Cipher    : ECDHE-RSA-AES128-GCM-SHA256
         Session-ID: 76FB83457B0CE42A7F7CDBD0F50BD61571AEAC775FE14C4EBB71A14D9EC1A480
-        Session-ID-ctx: 
+        Session-ID-ctx:
         Master-Key: 401286615C602006D81ECDD084B315F9E4E82D191D7B47E505BC6D9A13625870202B086ECB61C5F5F446BE36EF4A39C2
         PSK identity: None
         PSK identity hint: None
@@ -1441,7 +1453,7 @@ Yahoo:
         00a0 - ba 72 7c b3 9a 62 90 29-9b 28 45 0b 42 19 4a c8   .r|..b.).(E.B.J.
         00b0 - b4 3d 22 59 a8 ae a8 da-20 b8 22 6b 95 b2 44 91   .="Y.... ."k..D.
         00c0 - a7 4b d6 dc ce 9e 50 7b-dc 09 9e 43 fb e7 e0 dd   .K....P{...C....
-    
+
         Start Time: 1560830113
         Timeout   : 7200 (sec)
         Verify return code: 0 (ok)
@@ -1492,37 +1504,37 @@ the browser's Green Lock.
                         2c:ef
                     Exponent: 65537 (0x10001)
             X509v3 extensions:
-                X509v3 Authority Key Identifier: 
+                X509v3 Authority Key Identifier:
                     keyid:51:68:FF:90:AF:02:07:75:3C:CC:D9:65:64:62:A2:12:B8:59:72:3B
-    
-                X509v3 Subject Key Identifier: 
+
+                X509v3 Subject Key Identifier:
                     AE:99:BB:29:B9:C2:00:C5:0D:D4:73:A4:89:03:62:35:59:94:01:9B
-                X509v3 Subject Alternative Name: 
+                X509v3 Subject Alternative Name:
                     DNS:*.www.yahoo.com, DNS:add.my.yahoo.com, DNS:*.amp.yimg.com, DNS:au.yahoo.com, DNS:be.yahoo.com, DNS:br.yahoo.com, DNS:ca.my.yahoo.com, DNS:ca.rogers.yahoo.com, DNS:ca.yahoo.com, DNS:ddl.fp.yahoo.com, DNS:de.yahoo.com, DNS:en-maktoob.yahoo.com, DNS:espanol.yahoo.com, DNS:es.yahoo.com, DNS:fr-be.yahoo.com, DNS:fr-ca.rogers.yahoo.com, DNS:frontier.yahoo.com, DNS:fr.yahoo.com, DNS:gr.yahoo.com, DNS:hk.yahoo.com, DNS:hsrd.yahoo.com, DNS:ideanetsetter.yahoo.com, DNS:id.yahoo.com, DNS:ie.yahoo.com, DNS:in.yahoo.com, DNS:it.yahoo.com, DNS:maktoob.yahoo.com, DNS:malaysia.yahoo.com, DNS:mbp.yimg.com, DNS:my.yahoo.com, DNS:nz.yahoo.com, DNS:ph.yahoo.com, DNS:qc.yahoo.com, DNS:ro.yahoo.com, DNS:se.yahoo.com, DNS:sg.yahoo.com, DNS:tw.yahoo.com, DNS:uk.yahoo.com, DNS:us.yahoo.com, DNS:verizon.yahoo.com, DNS:vn.yahoo.com, DNS:www.yahoo.com, DNS:yahoo.com, DNS:za.yahoo.com, DNS:hk.rd.yahoo.com, DNS:tw.rd.yahoo.com
                 X509v3 Key Usage: critical
                     Digital Signature, Key Encipherment
-                X509v3 Extended Key Usage: 
+                X509v3 Extended Key Usage:
                     TLS Web Server Authentication, TLS Web Client Authentication
-                X509v3 CRL Distribution Points: 
-    
+                X509v3 CRL Distribution Points:
+
                     Full Name:
                       URI:http://crl3.digicert.com/sha2-ha-server-g6.crl
-    
+
                     Full Name:
                       URI:http://crl4.digicert.com/sha2-ha-server-g6.crl
-    
-                X509v3 Certificate Policies: 
+
+                X509v3 Certificate Policies:
                     Policy: 2.16.840.1.114412.1.1
                       CPS: https://www.digicert.com/CPS
                     Policy: 2.23.140.1.2.2
-    
-                Authority Information Access: 
+
+                Authority Information Access:
                     OCSP - URI:http://ocsp.digicert.com
                     CA Issuers - URI:http://cacerts.digicert.com/DigiCertSHA2HighAssuranceServerCA.crt
-    
+
                 X509v3 Basic Constraints: critical
                     CA:FALSE
-                CT Precertificate SCTs: 
+                CT Precertificate SCTs:
                     Signed Certificate Timestamp:
                         Version   : v1 (0x0)
                         Log ID    : EE:4B:BD:B7:75:CE:60:BA:E1:42:69:1F:AB:E1:9E:66:

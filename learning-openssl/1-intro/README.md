@@ -1,20 +1,38 @@
+# Table of Contents
+-   [Introduction to Openssl](#introduction-to-openssl)
+    -   [Different cli options](#different-cli-options)
+        -   [openssl version -a](#openssl-version--a)
+        -   [openssl help](#openssl-help)
+        -   [openssl rsa -help](#openssl-rsa--help)
+        -   [openssl x509 -help](#openssl-x509--help)
+        -   [openssl aes128](#openssl-aes128)
+        -   [openssl dgst -help](#openssl-dgst--help)
+        -   [openssl dgst file](#openssl-dgst-file)
+        -   [openssl sha512 file](#openssl-sha512-file)
+        -   [openssl sha512 -out file.hash
+            file](#openssl-sha512--out-filehash-file)
+        -   [openssl rand 100](#openssl-rand-100)
+        -   [openssl rand -base64 100](#openssl-rand--base64--100)
+        -   [openssl genrsa -help](#openssl-genrsa--help)
+        -   [openssl gendsa -help](#openssl-gendsa--help)
+
 #	Introduction to Openssl
 This section provides an introduction to OpenSSL, a key software for performing cryptographic operations.
 
 ##	Different cli options
 
-1. openssl version -a
+### openssl version -a
 
 	    OpenSSL 1.1.1b  26 Feb 2019
 	    built on: Wed Apr  3 10:50:23 2019 UTC
 	    platform: debian-amd64
-	    options:  bn(64,64) rc4(16x,int) des(int) blowfish(ptr) 
+	    options:  bn(64,64) rc4(16x,int) des(int) blowfish(ptr)
 	    compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -Wall -Wa,--noexecstack -g -O2 -fdebug-prefix-map=/build/openssl-uEA50R/openssl-1.1.1b=. -fstack-protector-strong -Wformat -Werror=format-security -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_CPUID_OBJ -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DKECCAK1600_ASM -DRC4_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -DX25519_ASM -DPADLOCK_ASM -DPOLY1305_ASM -DNDEBUG -Wdate-time -D_FORTIFY_SOURCE=2
 	    OPENSSLDIR: "/usr/lib/ssl"
 	    ENGINESDIR: "/usr/lib/x86_64-linux-gnu/engines-1.1"
 	    Seeding source: os-specific
 
-1. openssl help
+### openssl help
 
 	    Standard commands
 	    asn1parse         ca                ciphers           cms               
@@ -29,14 +47,14 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    s_server          s_time            sess_id           smime             
 	    speed             spkac             srp               storeutl          
 	    ts                verify            version           x509              
-	    
+
 	    Message Digest commands (see the `dgst' command for more details)
 	    blake2b512        blake2s256        gost              md4               
 	    md5               rmd160            sha1              sha224            
 	    sha256            sha3-224          sha3-256          sha3-384          
 	    sha3-512          sha384            sha512            sha512-224        
 	    sha512-256        shake128          shake256          sm3               
-	    
+
 	    Cipher commands (see the `enc' command for more details)
 	    aes-128-cbc       aes-128-ecb       aes-192-cbc       aes-192-ecb       
 	    aes-256-cbc       aes-256-ecb       aria-128-cbc      aria-128-cfb      
@@ -58,8 +76,8 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    rc4-40            seed              seed-cbc          seed-cfb          
 	    seed-ecb          seed-ofb          sm4-cbc           sm4-cfb           
 	    sm4-ctr           sm4-ecb           sm4-ofb
-	
-1.  openssl rsa -help
+
+### openssl rsa -help
 
 	    Usage: rsa [options]
 	    Valid options are:
@@ -84,7 +102,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -pvk-none          Don't enforce PVK encoding
 	     -engine val        Use engine, possibly a hardware device
 
-1. openssl x509 -help
+### openssl x509 -help
 
 	    Usage: x509 [options]
 	    Valid options are:
@@ -155,8 +173,8 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -issuer_hash_old      Print old-style (MD5) subject hash value
 	     -engine val           Use engine, possibly a hardware device
 	     -preserve_dates       preserve existing dates when signing
-	
-1. openssl aes128 
+
+### openssl aes128
 
 	    enter aes-128-cbc encryption password:
 	    Verifying - enter aes-128-cbc encryption password:
@@ -166,7 +184,7 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	    Salted__Q�!R���G�A�i����0�����A�h���>	���u�I�����n��z�0"m}%                                                                                                                                               
 
 
-1. openssl dgst -help
+### openssl dgst -help
 
 	    Usage: dgst [options] [file...]
 	      file... files to digest (default is stdin)
@@ -196,16 +214,16 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -engine_impl        Also use engine given by -engine for digest operations
 
 
-1. openssl dgst file
+### openssl dgst file
 
 			SHA256(file)= 9d63c3b5b7623d1fa3dc7fd1547313b9546c6d0fbbb6773a420613b7a17995c8
 
 
-1. openssl sha512 file
+### openssl sha512 file
 
 		SHA512(file)= 62f1c73922ba448579d9229f932e747c23d53400a6fb826c6ea5f478247420c62b681cd636840e0ae8556bcde856a24c0123c501aa3967c42530e3be8cb6de75
 
-1. openssl sha512 -out file.hash file
+### openssl sha512 -out file.hash file
 
 	==> ls -al
 
@@ -220,20 +238,20 @@ This section provides an introduction to OpenSSL, a key software for performing 
 		SHA512(file)= 62f1c73922ba448579d9229f932e747c23d53400a6fb826c6ea5f478247420c62b681cd636840e0ae8556bcde856a24c0123c501aa3967c42530e3be8cb6de75
 
 
-1. openssl rand 100
+### openssl rand 100
 
 		�����yT�E.k���ѡ�哹��7�|��܀�W�_Y��~�֨�K	Q���e�;��@Ti�!�
                                                            &䕤�nt^|����
                                                                        c�A%
 
-1. openssl rand -base64  100
+### openssl rand -base64  100
 
 		gVsU+iVzEkYBgbmALqLV5a7Z9HlPWqVZABPt/fhvFLH6N3ZBM64wDxBCK9wc5Dwa
 		9TOiSC+OVbBwzmwKiSv0uCyGd7lpzoxI7p7aX5UbrlG4Tc3gk8HWvPIH5ie6MJS7
 		Q1896w==
 
 
-1. openssl genrsa -help
+### openssl genrsa -help
 
 	    Usage: genrsa [options]
 	    Valid options are:
@@ -248,9 +266,9 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -*                  Encrypt the output with any supported cipher
 	     -engine val         Use engine, possibly a hardware device
 	     -primes +int        Specify number of primes
-	
 
-1. openssl gendsa -help
+
+### openssl gendsa -help
 
 	    Usage: gendsa [args] dsaparam-file
 	    Valid options are:
@@ -261,5 +279,3 @@ This section provides an introduction to OpenSSL, a key software for performing 
 	     -writerand outfile  Write random data to the specified file
 	     -*                  Encrypt the output with any supported cipher
 	     -engine val         Use engine, possibly a hardware device
-	
-
