@@ -1,0 +1,8 @@
+1. get data from versioned kv:
+
+curl \
+    --header "X-Vault-Token: $VAULT_TOKEN" \
+    --request GET \
+    http://127.0.0.1:8200/v1/secret/data/path-to-secret
+
+    
