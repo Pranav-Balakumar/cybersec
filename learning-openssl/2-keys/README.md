@@ -1,3 +1,15 @@
+# Table of Contents
+-   [Key Pair Usage - hands on](#key-pair-usage---hands-on)
+    -   [Generate RSA key pair](#generate-rsa-key-pair)
+    -   [Generate ECC key pair](#generate-ecc-key-pair)
+    -   [PEM vs DER and other formats](#pem-vs-der-and-other-formats)
+    -   [Sign and verify using keys](#sign-and-verify-using-keys)
+        -   [Sign](#sign)
+        -   [Verify Good File](#verify-good-file)
+        -   [Verify Bad File](#verify-bad-file)
+    -   [Encrypt and Decrypt using keys](#encrypt-and-decrypt-using-keys)
+        -   [Encryption](#encryption)
+        -   [Decryption](#decryption)
 #	Key Pair Usage - hands on
 ##	Generate RSA key pair
 
@@ -411,7 +423,7 @@ This creates a file with the signature, named textfile.sha256.
 
 1. Signature is a binary. Convert to text format for easy transportation.
 
-==> base64 textfile.sha256.sign 
+==> base64 textfile.sha256.sign
 
     UuTfZRlswom7eG6qB8o5zUiBg5DyURdqAW/lAUMQjnk0Eubuf1ZOdvA+j6g7qf1JLzFJ1H906VRX
     jmN+LiSUvKrv3W/kwQBVsDw1+I0gXSK3J3IOH2yG9KkAzE/0SoQNc8fDwrmU68NVB78Bwdil8e44
@@ -421,7 +433,7 @@ This creates a file with the signature, named textfile.sha256.
 
 Hexdump of signature
 
-==> hexdump textfile.sha256.sign 
+==> hexdump textfile.sha256.sign
 
     0000000 e452 65df 6c19 89c2 78bb aa6e ca07 cd39
     0000010 8148 9083 51f2 6a17 6f01 01e5 1043 798e
@@ -471,7 +483,7 @@ decrypt data.
     �Ht���#P����щ��r�3��w1[��?�V �El[q���4�+&��Y@�gd�.�ɶ�h�Q�6�<��
                                                                   ��	��\��~�b<��\b��*�3�%J�s�qj��&�(�ʋ:�GX��R
                                                                                                                     )@p����8�A��TW	��o��ږ�I���aT<$L@��}���,qM�2N�����%��/8��%UT��!�f��&
-    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                    ==> base64 textfile.enc 
+    ��i�b>�ԞԎ܆��#&�%                                                                                                                                                                                    ==> base64 textfile.enc
 
     p3sI4ZIDREcPi7J2i75IZ75pXjjzgHkKjwVIdKmcvSNQ4K7YzdXRianOcvKXM62RdzEYW4GoP59W
     IM1FbFtxzOHjNJArJgEPlhfKWUCHZ2QcrhEu7Mm272iUUcsHNpA8/4ALnqgHCfodgFyt534DimI8
@@ -484,4 +496,3 @@ decrypt data.
 ==> openssl rsautl -in textfile.enc -inkey key.pem -decrypt        
 
     This is a test file"
-
