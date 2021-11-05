@@ -1,0 +1,1435 @@
+
+1. basic packet types: icmp ping, traceroute. here we can play with the options and show
+2. arp: run arp to get some mac address to ip address mapping. then do a grat arp to make it look like you own an ip address
+3. some tcp and udp flows. our focus should be on changing the parameters of the packet so that we can show how to send malformed packets and maybe crash the system
+4. http?
+5. this should be big bang demo of something huge. i dont know what though
+6. geolocation
+7. plotting with pyx, svg, etc
+8. pcap
+
+
+
+1. Start with basics of scapy
+
+scapy has types for all layers of the protocol stack, and specific protocols. There are many protocols covered in scapy. We will start with basics.
+
+o We create an IP packet with everything being the default.
+
+>>> a=IP()
+>>> a
+<IP  |>
+
+o We specify a ttl here and only ttl
+
+>>> a=IP(ttl=10)
+>>> a
+<IP  ttl=10 |>
+
+o Since we didnt specify any src or destination, default is picked;
+
+>>> a.src
+'127.0.0.1'
+>>> a.dst
+'127.0.0.1'
+
+o Printing the packet will dump the raw data:
+
+>>> print (a)
+b'E\x00\x00\x14\x00\x01\x00\x00\n\x00\xb2\xe7\x7f\x00\x00\x01\x7f\x00\x00\x01'
+
+>>> a.src
+'127.0.0.1'
+
+o Lets set a destination:
+
+>>> a.dst="1.1.1.1"
+>>> a
+<IP  ttl=10 dst=1.1.1.1 |>
+
+o we will set a src as well
+a.src = "10.65.66.1"
+
+>>> a.src
+'10.65.66.1'
+
+o we can delete specific values and it will revert to defaults
+
+>>> del(a.ttl)
+>>> a
+<IP  dst=1.1.1.1 |>
+
+Lets try with different protocols.
+
+b=TCP()
+b.sport=1000
+b.dport=10001
+print(b)
+b.show()
+a.show()
+
+
+2. now we can create layers
+
+IP and TCP as lower and upper layers
+
+>>> a=IP()/TCP()
+>>> a
+<IP  frag=0 proto=tcp |<TCP  |>>
+
+a.show()
+
+o See that proto type has been automatically set to TCP by just initializing the layers
+
+o Create ether layer:
+
+>>> a=Ether()/a
+>>> a
+<Ether  type=IPv4 |<IP  frag=0 proto=tcp |<TCP  |>>>
+
+a.show()
+
+o Lets do an http packet:
+
+>>> IP()/TCP()/"GET / HTTP/1.0"
+<IP  frag=0 proto=tcp |<TCP  |<Raw  load='GET / HTTP/1.0' |>>>
+
+You can see that there is raw content after tcp, which is the http content.
+
+>>> IP()/TCP()/"GET / HTTP/1.0\r\n\r\n"
+<IP  frag=0 proto=tcp |<TCP  |<Raw  load='GET / HTTP/1.0\r\n\r\n' |>>>
+>>> raw(a)
+b'\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x08\x00E\x00\x00(\x00\x01\x00\x00@\x06|\xcd\x7f\x00\x00\x01\x7f\x00\x00\x01\x00\x14\x00P\x00\x00\x00\x00\x00\x00\x00\x00P\x02 \x00\x91|\x00\x00'
+>>>
+
+>>> a=Ether()/IP(dst="192.168.221.1")/TCP()/"GET /index.html HTTP/1.0 \n\n"
+>>> raw(a)
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: Could not get the source MAC: No MAC address found on utun6 !
+b'\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06P\xcf\nA!,\xd8i&\x0f\x00\x14\x00P\x00\x00\x00\x00\x00\x00\x00\x00P\x02 \x00\x93\xcc\x00\x00GET /index.html HTTP/1.0 \n\n'
+>>>
+>>> a
+<Ether  type=IPv4 |<IP  frag=0 proto=tcp dst=Net('www.slashdot.org') |<TCP  |<Raw  load='GET /index.html HTTP/1.0 \n\n' |>>>>
+
+a.show()
+
+
+>>> Ether(a)
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: Could not get the source MAC: No MAC address found on utun6 !
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: Could not get the source MAC: No MAC address found on utun6 !
+<Raw  load='\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x08\x00E\x00\x00C\x00\x01\x00\x00@\x06P\xcf\nA!,\xd8i&\x0f\x00\x14\x00P\x00\x00\x00\x00\x00\x00\x00\x00P\x02 \x00\x93\xcc\x00\x00GET /index.html HTTP/1.0 \n\n' |>
+>>> b=raw(a)
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: Could not get the source MAC: No MAC address found on utun6 !
+
+Ether(a)
+IP(a)
+TCP(a)
+
+
+
+>>> Ether(b)
+<Ether  dst=ff:ff:ff:ff:ff:ff src=00:00:00:00:00:00 type=IPv4 |<IP  version=4 ihl=5 tos=0x0 len=67 id=1 flags= frag=0 ttl=64 proto=tcp chksum=0x50cf src=10.65.33.44 dst=216.105.38.15 |<TCP  sport=ftp_data dport=http seq=0 ack=0 dataofs=5 reserved=0 flags=S window=8192 chksum=0x93cc urgptr=0 |<Raw  load='GET /index.html HTTP/1.0 \n\n' |>>>>
+>>> c=Ether(b)
+>>> c
+<Ether  dst=ff:ff:ff:ff:ff:ff src=00:00:00:00:00:00 type=IPv4 |<IP  version=4 ihl=5 tos=0x0 len=67 id=1 flags= frag=0 ttl=64 proto=tcp chksum=0x50cf src=10.65.33.44 dst=216.105.38.15 |<TCP  sport=ftp_data dport=http seq=0 ack=0 dataofs=5 reserved=0 flags=S window=8192 chksum=0x93cc urgptr=0 |<Raw  load='GET /index.html HTTP/1.0 \n\n' |>>>>
+>>> c=Ether(b)
+>>> c
+<Ether  dst=ff:ff:ff:ff:ff:ff src=00:00:00:00:00:00 type=IPv4 |<IP  ihl=5 len=67 frag=0 proto=tcp chksum=0x50cf src=10.65.33.44 dst=216.105.38.15 |<TCP  dataofs=5 chksum=0x93cc |<Raw  load='GET /index.html HTTP/1.0 \n\n' |>>>>
+
+
+Open wireshark
+
+3. Send packet out
+
+>>> a=IP(dst="192.168.221.1")/ICMP()              
+>>> a.show()             
+###[ IP ]### 
+  version= 4
+  ihl= None
+  tos= 0x0
+  len= None
+  id= 1
+  flags= 
+  frag= 0
+  ttl= 64
+  proto= icmp
+  chksum= None
+  src= 192.168.221.2
+  dst= 192.168.221.1
+  \options\
+###[ ICMP ]### 
+     type= echo-request
+     code= 0
+     chksum= None
+     id= 0x0
+     seq= 0x0
+
+
+>>> send(IP(dst="10.0.0.14")/ICMP())
+.
+Sent 1 packets.
+
+
+4. Send and receive packet
+
+>>> p = sr1(IP(dst="1.1.1.1")/ICMP())
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> p
+<IP  version=4 ihl=5 tos=0x0 len=28 id=32244 flags= frag=0 ttl=58 proto=icmp chksum=0x3fdb src=1.1.1.1 dst=192.168.0.104 |<ICMP  type=echo-reply code=0 chksum=0x0 id=0x0 seq=0x0 |>>
+
+p.show()
+
+
+
+>>> p = sr1(IP(dst="1.1.1.1")/ICMP())
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> p
+<IP  version=4 ihl=5 tos=0x0 len=28 id=32244 flags= frag=0 ttl=58 proto=icmp chksum=0x3fdb src=1.1.1.1 dst=192.168.0.104 |<ICMP  type=echo-reply code=0 chksum=0x0 id=0x0 seq=0x0 |>>
+
+5. Send and receive more than one packet.
+
+
+>>> p = sr(IP(dst="1.1.1.1")/ICMP())
+Begin emission:
+..Finished sending 1 packets.
+.*
+Received 4 packets, got 1 answers, remaining 0 packets
+>>> p
+(<Results: TCP:0 UDP:0 ICMP:1 Other:0>, <Unanswered: TCP:0 UDP:0 ICMP:0 Other:0>)
+>>> type(p)
+<class 'tuple'>
+>>> type(p)      ans,unans = sr(IP(dst="1.1.1.1")/ICMP())
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+
+
+>>> ans
+<Results: TCP:0 UDP:0 ICMP:1 Other:0>
+>>> unans
+<Unanswered: TCP:0 UDP:0 ICMP:0 Other:0>
+>>> type(ans)
+<class 'scapy.plist.SndRcvList'>
+>>> type(unans)
+<class 'scapy.plist.PacketList'>
+
+6. Print each of the packets
+
+>>> for i in ans:
+...     print(type(i))
+...
+<class 'tuple'>
+>>> for i in ans:
+...     print(i)
+...
+(<IP  frag=0 proto=icmp dst=1.1.1.1 |<ICMP  |>>, <IP  version=4 ihl=5 tos=0x0 len=28 id=23344 flags= frag=0 ttl=58 proto=icmp chksum=0x629f src=1.1.1.1 dst=192.168.0.104 |<ICMP  type=echo-reply code=0 chksum=0x0 id=0x0 seq=0x0 |>>)
+>>> for i in unans:
+...     print(i)
+...
+>>>
+
+7. DNS Packets
+
+>>> p = sr1(IP(dst="8.8.8.8")/UDP()/DNS(rd=1,qd=DNSQR(qname="www.google.com")))
+Begin emission:
+..Finished sending 1 packets.
+.*
+Received 4 packets, got 1 answers, remaining 0 packets
+>>> p
+<IP  version=4 ihl=5 tos=0x80 len=76 id=46377 flags= frag=0 ttl=123 proto=udp chksum=0xb8d7 src=8.8.8.8 dst=192.168.0.104 |<UDP  sport=domain dport=domain len=56 chksum=0x825b |<DNS  id=0 qr=1 opcode=QUERY aa=0 tc=0 rd=1 ra=1 z=0 ad=0 cd=0 rcode=ok qdcount=1 ancount=1 nscount=0 arcount=0 qd=<DNSQR  qname='www.google.com.' qtype=A qclass=IN |> an=<DNSRR  rrname='www.google.com.' type=A rclass=IN ttl=286 rdlen=None rdata=142.250.76.68 |> ns=None ar=None |>>>
+
+p.show()
+
+Run a ping to this host
+
+8. Sniffing
+
+>>> a = sniff(filter="icmp and host 192.168.0.130", count=5)
+>>> a
+<Sniffed: TCP:0 UDP:0 ICMP:5 Other:0>
+>>> a.show()
+0000 Ether / IP / ICMP 192.168.0.104 > 192.168.0.130 echo-request 0 / Raw
+0001 Ether / IP / ICMP 192.168.0.130 > 192.168.0.104 echo-reply 0 / Raw
+0002 Ether / IP / ICMP 192.168.0.104 > 192.168.0.130 echo-request 0 / Raw
+0003 Ether / IP / ICMP 192.168.0.130 > 192.168.0.104 echo-reply 0 / Raw
+0004 Ether / IP / ICMP 192.168.0.104 > 192.168.0.130 echo-request 0 / Raw
+>>>
+
+Run the below command and then do:
+1. ping 192.168.0.104
+2. curl www.google.com > /dev/null
+
+>>> a = sniff(filter="host 192.168.0.104", count=5)
+>>> a.show()
+0000 Ether / IP / TCP 52.108.16.41:https > 192.168.0.104:53919 PA / Raw
+0001 Ether / IP / TCP 192.168.0.104:53919 > 52.108.16.41:https A
+0002 Ether / IP / TCP 100.20.55.221:https > 192.168.0.104:57840 PA / Raw
+0003 Ether / IP / TCP 192.168.0.104:57840 > 100.20.55.221:https A
+0004 Ether / IP / TCP 34.224.236.198:https > 192.168.0.104:57911 PA / Raw
+>>>
+
+Show each of the packets in detail
+
+>>> for i in a:
+...     i.show()
+...
+###[ Ethernet ]###
+  dst= 88:e9:fe:6b:26:11
+  src= 60:32:b1:86:c9:18
+  type= IPv4
+###[ IP ]###
+     version= 4
+     ihl= 5
+     tos= 0x0
+     len= 73
+     id= 48802
+     flags= DF
+     frag= 0
+     ttl= 106
+     proto= tcp
+     chksum= 0x4c67
+     src= 52.108.16.41
+     dst= 192.168.0.104
+     \options\
+###[ TCP ]###
+        sport= https
+        dport= 53919
+        seq= 3628391265
+        ack= 3655727903
+        dataofs= 5
+        reserved= 0
+        flags= PA
+        window= 2050
+        chksum= 0xc892
+        urgptr= 0
+        options= []
+###[ Raw ]###
+           load= '\x17\x03\x03\x00\x1c\x00\x00\x00\x00\x00\x00\x02\x9f\xb0\ne}\xdep\xb0PE|\xe1\xe2\x18U\xd2\x8f\xae\x10\x00\t'
+
+###[ Ethernet ]###
+  dst= 60:32:b1:86:c9:18
+  src= 88:e9:fe:6b:26:11
+  type= IPv4
+###[ IP ]###
+     version= 4
+     ihl= 5
+     tos= 0x0
+     len= 40
+     id= 0
+     flags= DF
+     frag= 0
+     ttl= 64
+     proto= tcp
+     chksum= 0x352b
+     src= 192.168.0.104
+     dst= 52.108.16.41
+     \options\
+###[ TCP ]###
+        sport= 53919
+        dport= https
+        seq= 3655727903
+        ack= 3628391298
+        dataofs= 5
+        reserved= 0
+        flags= A
+        window= 4096
+        chksum= 0x3d07
+        urgptr= 0
+        options= []
+
+###[ Ethernet ]###
+  dst= 88:e9:fe:6b:26:11
+  src= 60:32:b1:86:c9:18
+  type= IPv4
+###[ IP ]###
+     version= 4
+     ihl= 5
+     tos= 0x20
+     len= 90
+     id= 54341
+     flags= DF
+     frag= 0
+     ttl= 221
+     proto= tcp
+     chksum= 0x6c36
+     src= 100.20.55.221
+     dst= 192.168.0.104
+     \options\
+###[ TCP ]###
+        sport= https
+        dport= 57840
+        seq= 2613635009
+        ack= 4234668298
+        dataofs= 8
+        reserved= 0
+        flags= PA
+        window= 114
+        chksum= 0xdbfa
+        urgptr= 0
+        options= [('NOP', None), ('NOP', None), ('Timestamp', (1931899043, 3038324632))]
+###[ Raw ]###
+           load= '\x17\x03\x03\x00!Ne\xb4p\xd5\x8al\x99\x08(\xde$\x0fUg\xda7\xd5\xc7\xd6\xfaU\xe3.;\xb5\xdc?\xf9K\xd4\x0b\x94'
+
+###[ Ethernet ]###
+  dst= 60:32:b1:86:c9:18
+  src= 88:e9:fe:6b:26:11
+  type= IPv4
+###[ IP ]###
+     version= 4
+     ihl= 5
+     tos= 0x0
+     len= 52
+     id= 0
+     flags= DF
+     frag= 0
+     ttl= 64
+     proto= tcp
+     chksum= 0xddc2
+     src= 192.168.0.104
+     dst= 100.20.55.221
+     \options\
+###[ TCP ]###
+        sport= 57840
+        dport= https
+        seq= 4234668298
+        ack= 2613635047
+        dataofs= 8
+        reserved= 0
+        flags= A
+        window= 2047
+        chksum= 0x381
+        urgptr= 0
+        options= [('NOP', None), ('NOP', None), ('Timestamp', (3038324873, 1931899043))]
+
+###[ Ethernet ]###
+  dst= 88:e9:fe:6b:26:11
+  src= 60:32:b1:86:c9:18
+  type= IPv4
+###[ IP ]###
+     version= 4
+     ihl= 5
+     tos= 0x20
+     len= 253
+     id= 64461
+     flags= DF
+     frag= 0
+     ttl= 48
+     proto= tcp
+     chksum= 0x7d56
+     src= 34.224.236.198
+     dst= 192.168.0.104
+     \options\
+###[ TCP ]###
+        sport= https
+        dport= 57911
+        seq= 2574959417
+        ack= 1308381527
+        dataofs= 8
+        reserved= 0
+        flags= PA
+        window= 426
+        chksum= 0xa9c8
+        urgptr= 0
+        options= [('NOP', None), ('NOP', None), ('Timestamp', (3565661939, 1307225591))]
+###[ Raw ]###
+           load= "\x17\x03\x03\x00\xc4\xe8\x0c\xd4`\x17\x80r\xef\xd2\x84\xce\x85w\x98\x8b\xee\x91e\xf4K3\xac\xe1i\n\xd2\xee`\x14b6l\xcb\x19\xac\xb4\x88\x136^\xb4\x03\xdd\x06}\xe9\x88\xaf\x04\\x\xf4\x91\xa7\x04\xc9\x18\x97\xc9f\x8e`\xf1\x88\xa8K\x84|\x88\xecJ\x97\xf7\xcb\x1e\x8e[\xf35\xef\x1dK\xed=v\xfb\xe2\x95a\xdd'\xe4\xf7-\x05Vn\x93\xb0\x81x\x834\xbe\x83\xb8\xe7\x88\xdd\xb6J\xf6>\x8f\xae.T[\x17\xb56\x96\xff\x1b\xeeT6\xb54wb\xe1\xc1cB\x10\x12\x01X\x88Cd]D\xb9\xf1\xb7\xe0\x90\xd5\xc8\xe7\xec\xed\xc6\xdc[\xca7\x83_1mC6\xca\xb9\xa1f\xc5\xed5\xf9\xcc,v\x8c\x07\x88\x1d\x1aB\x8b\x80\xa9%>l\xa7[\xf8\xc7\x94\xee\xeb\xed"
+
+
+
+9. TCP Port scan:
+We can send a SYN packet and see whether the server will return with SYN-ACK:
+
+
+>>> p = sr1(IP(dst="192.168.0.103")/TCP(sport=666,dport=23,flags="S"))
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> p.show()
+###[ IP ]###
+  version= 4
+  ihl= 5
+  tos= 0x0
+  len= 40
+  id= 11381
+  flags=
+  frag= 0
+  ttl= 64
+  proto= tcp
+  chksum= 0x0
+  src= 192.168.0.104
+  dst= 192.168.0.104
+  \options\
+###[ TCP ]###
+     sport= telnet
+     dport= mdqs
+     seq= 0
+     ack= 1
+     dataofs= 5
+     reserved= 0
+     flags= RA  <=== RESET-ACK
+     window= 0
+     chksum= 0x823b
+     urgptr= 0
+     options= []
+
+Notice that in the output here, the server is responding with a RESET+ACK for TCP port 23. However, TCP port 22 (SSH) is open, therefore a SYN-ACK is returned:
+
+ = sr1(IP(dst="192.168.0.104")/TCP(sport=666,dport=22,flags="S"))
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> p.show()
+###[ IP ]###
+  version= 4
+  ihl= 5
+  tos= 0x0
+  len= 44
+  id= 0
+  flags= DF
+  frag= 0
+  ttl= 64
+  proto= tcp
+  chksum= 0x0
+  src= 192.168.0.104
+  dst= 192.168.0.104
+  \options\
+###[ TCP ]###
+     sport= ssh
+     dport= mdqs
+     seq= 2913739486
+     ack= 1
+     dataofs= 6
+     reserved= 0
+     flags= SA  <== SYN-ACK
+     window= 65535
+     chksum= 0x823f
+     urgptr= 0
+     options= [('MSS', 16344)]
+
+10. 
+We can also scan a range of destination ports from 20 to 22; note that we are using sr() for send-receive instead of the sr1() send-receive-one-packet:
+
+ans,unans = sr(IP(dst="192.168.0.103")/TCP(sport=666,dport=(20,22),flags="S"))
+
+for i in ans:
+    print(i)
+
+11. Show command details. hide defaults
+
+# hide defaults
+>>> c.hide_defaults()
+>>> c
+<Ether dst=00:0f:66:56:fa:d2 src=00:ae:f3:52:aa:d1 type=0x800 |<IP ihl=5L len=67
+ frag=0 proto=TCP chksum=0x783c src=192.168.5.21 dst=66.35.250.151 |<TCP dataofs=5L
+ chksum=0xbb39 options=[] |<Raw load='GET /index.html HTTP/1.0 \n\n' |>>>>
+ 
+
+# XXX Unable to test
+ans,unans = sr(IP(dst="192.168.0.104")/TCP(sport=666,dport=(20,22),flags="S"))
+ans,unans = sr(IP(dst="192.168.0.0/24")/TCP(sport=666,dport=(22),flags="S"))
+ans,unans = sr(IP(dst="192.168.0.116")/TCP(sport=666,dport=(20,22),flags="S"))
+
+11. More tcp scan
+# See tcp_scan.py
+# see ping_all_protos.py
+# set timeout for sr()
+
+12. Malformed packets
+## incorrect header type
+  def malformed_packet_attack(host):
+      send(IP(dst=host, ihl=2, version=3)/ICMP())
+
+
+## Ping of death
+   def ping_of_death_attack(host):
+       # https://en.wikipedia.org/wiki/Ping_of_death
+       send(fragment(IP(dst=host)/ICMP()/("X"*60000)))
+
+## Land attack
+  def land_attack(host):
+      # https://en.wikipedia.org/wiki/Denial-of-service_attack
+      send(IP(src=host, dst=host)/TCP(sport=135,dport=135))
+
+>>> ans,unans=sr(IP(dst="asgard.local")/ICMP())
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> ans
+<Results: TCP:0 UDP:0 ICMP:1 Other:0>
+>>> unans
+<Unanswered: TCP:0 UDP:0 ICMP:0 Other:0>
+>>> ans.summary()
+IP / ICMP 192.168.0.116 > 192.168.0.136 echo-request 0 ==> IP / ICMP 192.168.0.136 > 192.168.0.116 echo-reply 0
+>>> unans.summary()
+
+>>> ans,unans=sr(IP(dst="192.168.0.136")/ICMP())
+Begin emission:
+Finished sending 1 packets.
+...*
+Received 4 packets, got 1 answers, remaining 0 packets
+
+13. Conversations
+
+>>> ans.conversations()
+ERROR: Could not execute display, is it installed?
+Traceback (most recent call last):
+  File "/Users/kasivaku/Library/Python/3.7/lib/python/site-packages/scapy/utils.py", line 836, in do_graph
+    stdin=subprocess.PIPE).stdin
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/subprocess.py", line 775, in __init__
+    restore_signals, start_new_session)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/subprocess.py", line 1522, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'display': 'display'
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "/Users/kasivaku/Library/Python/3.7/lib/python/site-packages/scapy/plist.py", line 515, in conversations
+    return do_graph(gr, **kargs)
+  File "/Users/kasivaku/Library/Python/3.7/lib/python/site-packages/scapy/utils.py", line 857, in do_graph
+    plain_str(stderr)
+OSError: GraphViz call failed (is it installed?):
+/bin/sh: dot: command not found
+
+>>> ans.show()
+0000 IP / ICMP 192.168.0.116 > 192.168.0.136 echo-request 0 ==> IP / ICMP 192.168.0.136 > 192.168.0.116 echo-reply 0
+>>> ans.hexdump()
+0000 21:37:12.886809 IP / ICMP 192.168.0.116 > 192.168.0.136 echo-request 0 ==> IP / ICMP 192.168.0.136 > 192.168.0.116 echo-reply 0
+0000  45 00 00 1C EB EB 00 00 80 01 CC A8 C0 A8 00 88  E...............
+0010  C0 A8 00 74 00 00 FF FF 00 00 00 00              ...t........
+>>> ans.hexraw()
+0000 21:37:12.886809 IP / ICMP 192.168.0.116 > 192.168.0.136 echo-request 0 ==> IP / ICMP 192.168.0.136 > 192.168.0.116 echo-reply 0
+>>> ans.padding()
+>>> ans.make_table()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "/Users/kasivaku/Library/Python/3.7/lib/python/site-packages/scapy/plist.py", line 269, in make_table
+    return make_table(self.res, *args, **kargs)
+  File "/Users/kasivaku/Library/Python/3.7/lib/python/site-packages/scapy/utils.py", line 2488, in make_table
+    **kargs
+TypeError: __make_table() missing 1 required positional argument: 'fxyz'
+
+
+Fuzzing
+
+>>> p=IP(dst="192.168.0.136")/ICMP()
+>>> p
+<IP  frag=0 proto=icmp dst=192.168.0.136 |<ICMP  |>>
+>>> p
+<IP  frag=0 proto=icmp dst=192.168.0.136 |<ICMP  |>>
+>>> p=IP(dst="192.168.0.136")/fuzz(ICMP())
+>>> p
+<IP  frag=0 proto=icmp dst=192.168.0.136 |<ICMP  |>>
+>>> p=fuzz(IP(dst="192.168.0.136"))
+>>> p
+<IP  dst=192.168.0.136 |>
+>>> p=p/ICMP()
+>>> p
+<IP  frag=0 proto=icmp dst=192.168.0.136 |<ICMP  |>>
+>>>
+
+14. DNS
+
+Create a DNS query packet to my dns server:
+IP(dst="8.8.8.8")/UDP()/DNS(rd=1,qd=DNSQR(qname="www.slashdot.org"))
+
+>>> p=IP(dst="8.8.8.8")/UDP()/DNS(rd=1,qd=DNSQR(qname="www.slashdot.org"))
+>>> p
+<IP  frag=0 proto=udp dst=8.8.8.8 |<UDP  sport=domain |<DNS  rd=1 qd=<DNSQR  qname='www.slashdot.org' |> |>>>
+>>> p.show()
+###[ IP ]###
+  version   = 4
+  ihl       = None
+  tos       = 0x0
+  len       = None
+  id        = 1
+  flags     =
+  frag      = 0
+  ttl       = 64
+  proto     = udp
+  chksum    = None
+  src       = 192.168.0.116
+  dst       = 8.8.8.8
+  \options   \
+###[ UDP ]###
+     sport     = domain
+     dport     = domain
+     len       = None
+     chksum    = None
+###[ DNS ]###
+        id        = 0
+        qr        = 0
+        opcode    = QUERY
+        aa        = 0
+        tc        = 0
+        rd        = 1
+        ra        = 0
+        z         = 0
+        ad        = 0
+        cd        = 0
+        rcode     = ok
+        qdcount   = 1
+        ancount   = 0
+        nscount   = 0
+        arcount   = 0
+        \qd        \
+         |###[ DNS Question Record ]###
+         |  qname     = 'www.slashdot.org'
+         |  qtype     = A
+         |  qclass    = IN
+        an        = None
+        ns        = None
+        ar        = None
+
+>>>
+
+>>> a=sr1(p)
+Begin emission:
+Finished sending 1 packets.
+...*
+Received 4 packets, got 1 answers, remaining 0 packets
+>>> a
+<IP  version=4 ihl=5 tos=0x80 len=78 id=57054 flags= frag=0 ttl=123 proto=udp chksum=0x8f14 src=8.8.8.8 dst=192.168.0.116 |<UDP  sport=domain dport=domain len=58 chksum=0x9d61 |<DNS  id=0 qr=1 opcode=QUERY aa=0 tc=0 rd=1 ra=1 z=0 ad=0 cd=0 rcode=ok qdcount=1 ancount=1 nscount=0 arcount=0 qd=<DNSQR  qname='www.slashdot.org.' qtype=A qclass=IN |> an=<DNSRR  rrname='www.slashdot.org.' type=A rclass=IN ttl=299 rdlen=None rdata=204.68.111.106 |> ns=None ar=None |>>>
+>>> a.show()
+###[ IP ]###
+  version   = 4
+  ihl       = 5
+  tos       = 0x80
+  len       = 78
+  id        = 57054
+  flags     =
+  frag      = 0
+  ttl       = 123
+  proto     = udp
+  chksum    = 0x8f14
+  src       = 8.8.8.8
+  dst       = 192.168.0.116
+  \options   \
+###[ UDP ]###
+     sport     = domain
+     dport     = domain
+     len       = 58
+     chksum    = 0x9d61
+###[ DNS ]###
+        id        = 0
+        qr        = 1
+        opcode    = QUERY
+        aa        = 0
+        tc        = 0
+        rd        = 1
+        ra        = 1
+        z         = 0
+        ad        = 0
+        cd        = 0
+        rcode     = ok
+        qdcount   = 1
+        ancount   = 1
+        nscount   = 0
+        arcount   = 0
+        \qd        \
+         |###[ DNS Question Record ]###
+         |  qname     = 'www.slashdot.org.'
+         |  qtype     = A
+         |  qclass    = IN
+        \an        \
+         |###[ DNS Resource Record ]###
+         |  rrname    = 'www.slashdot.org.'
+         |  type      = A
+         |  rclass    = IN
+         |  ttl       = 299
+         |  rdlen     = None
+         |  rdata     = 204.68.111.106
+        ns        = None
+        ar        = None
+
+>>>
+
+15. Range of ports to scan
+
+sr(IP(dst="192.168.0.101")/TCP(dport=[21,22,23]))
+>>> p=sr(IP(dst="192.168.0.101")/TCP(dport=[21,22,23]))
+Begin emission:
+Finished sending 3 packets.
+....**.*
+Received 8 packets, got 3 answers, remaining 0 packets
+>>> ans
+<Results: TCP:0 UDP:0 ICMP:0 Other:0>
+>>> unans
+<Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>
+>>> ans.summary()
+>>> unans.summary()
+IP / TCP 192.168.0.116:ftp_data > 192.168.0.136:ftp S
+IP / TCP 192.168.0.116:ftp_data > 192.168.0.136:ssh S
+IP / TCP 192.168.0.116:ftp_data > 192.168.0.136:telnet S
+>>>
+p=sr1(IP(dst="192.168.0.101")/TCP(dport=[21,22,23]))
+
+>>> p=sr1(IP(dst="192.168.0.101")/TCP(dport=[21,22,23]))
+Begin emission:
+Finished sending 3 packets.
+...*.*.*
+Received 8 packets, got 3 answers, remaining 0 packets
+>>> p
+<IP  version=4 ihl=5 tos=0x0 len=40 id=43850 flags=DF frag=0 ttl=64 proto=tcp chksum=0xd5c src=192.168.0.101 dst=192.168.0.116 |<TCP  sport=ftp dport=ftp_data seq=0 ack=1 dataofs=5 reserved=0 flags=RA window=0 chksum=0x2d7d urgptr=0 |>>
+>>>
+
+>>> sr(IP(dst="127.0.0.1")/TCP(dport=[21,22,23]), timeout=10)
+Begin emission:
+Finished sending 3 packets.
+.......................................................................
+Received 71 packets, got 0 answers, remaining 3 packets
+(<Results: TCP:0 UDP:0 ICMP:0 Other:0>, <Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>)
+>>>
+
+>>> sr(IP(dst="192.168.0.136")/TCP(dport=[21,22,23]), timeout=10)
+Begin emission:
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: Mac address to reach destination not found. Using broadcast.
+WARNING: more Mac address to reach destination not found. Using broadcast.
+Finished sending 3 packets.
+............................................................................................................................................................................................
+Received 188 packets, got 0 answers, remaining 3 packets
+(<Results: TCP:0 UDP:0 ICMP:0 Other:0>, <Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>)
+>>> ans,unans=_
+>>> ans
+<Results: TCP:0 UDP:0 ICMP:0 Other:0>
+>>> unans
+<Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>
+>>>
+
+16. Syn scan to google
+sr1(IP(dst="www.google.com")/TCP(dport=80,flags="S"))
+>>> sr1(IP(dst="www.google.com")/TCP(dport=80,flags="S"))
+Begin emission:
+Finished sending 1 packets.
+.*
+Received 2 packets, got 1 answers, remaining 0 packets
+<IP  version=4 ihl=5 tos=0x80 len=44 id=59132 flags= frag=0 ttl=60 proto=tcp chksum=0x15 src=142.250.71.36 dst=192.168.0.116 |<TCP  sport=http dport=ftp_data seq=2378189575 ack=1 dataofs=6 reserved=0 flags=SA window=65535 chksum=0x27cd urgptr=0 options=[('MSS', 1430)] |>>
+
+
+17. Scan a range of ports
+p=sr(IP(dst="www.google.com")/TCP(sport=666,dport=(440,443),flags="S"))
+>>> p=sr(IP(dst="www.google.com")/TCP(sport=666,dport=(440,443),flags="S"), timeout=5)
+Begin emission:
+Finished sending 4 packets.
+......*...................................................................................................................
+Received 122 packets, got 1 answers, remaining 3 packets
+>>> p
+(<Results: TCP:1 UDP:0 ICMP:0 Other:0>, <Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>)
+>>> ans,unans=p
+>>> ans
+<Results: TCP:1 UDP:0 ICMP:0 Other:0>
+>>> unans
+<Unanswered: TCP:3 UDP:0 ICMP:0 Other:0>
+>>> ans.show()
+0000 IP / TCP 192.168.0.116:mdqs > 142.250.71.36:https S ==> IP / TCP 142.250.71.36:https > 192.168.0.116:mdqs SA
+>>> unans.show()
+0000 IP / TCP 192.168.0.116:mdqs > 142.250.71.36:sgcp S
+0001 IP / TCP 192.168.0.116:mdqs > 142.250.71.36:decvms_sysmgt S
+0002 IP / TCP 192.168.0.116:mdqs > 142.250.71.36:cvc_hostd S
+>>>
+
+# change the range to list
+ans,unans=sr(IP(dst="www.google.com")/TCP(sport=666,dport=[440,441],flags="S"), timeout=5)
+>>> ans,unans=sr(IP(dst="www.google.com")/TCP(sport=666,dport=[440,441],flags="S"), timeout=5)
+Begin emission:
+Finished sending 2 packets.
+...................................................................
+Received 67 packets, got 0 answers, remaining 2 packets
+>>> ans
+<Results: TCP:0 UDP:0 ICMP:0 Other:0>
+>>> unans
+<Unanswered: TCP:2 UDP:0 ICMP:0 Other:0>
+>>>
+
+# change one of the ports to 443
+ans,unans=sr(IP(dst="www.google.com")/TCP(sport=666,dport=[440,443],flags="S"), timeout=5)
+
+>>> ans,unans=sr(IP(dst="www.google.com")/TCP(sport=666,dport=[440,443],flags="S"), timeout=5)
+Begin emission:
+Finished sending 2 packets.
+....*.....................................................................................
+Received 90 packets, got 1 answers, remaining 1 packets
+>>> ans
+<Results: TCP:1 UDP:0 ICMP:0 Other:0>
+>>> unans
+<Unanswered: TCP:1 UDP:0 ICMP:0 Other:0>
+>>> ans.summary()
+IP / TCP 192.168.0.116:mdqs > 172.217.163.164:https S ==> IP / TCP 172.217.163.164:https > 192.168.0.116:mdqs SA
+>>> ans.summary()
+IP / TCP 192.168.0.116:mdqs > 172.217.163.164:https S ==> IP / TCP 172.217.163.164:https > 192.168.0.116:mdqs SA
+>>> ans.summary(lambda s,r: r.sprintf("%TCP.sport% \t %TCP.flags%"))
+https 	 SA
+
+>>> unans.summary()
+IP / TCP 192.168.0.116:mdqs > 172.217.163.164:sgcp S
+>>> ans.show()
+0000 IP / TCP 192.168.0.116:mdqs > 172.217.163.164:https S ==> IP / TCP 172.217.163.164:https > 192.168.0.116:mdqs SA
+>>> unans.show()
+0000 IP / TCP 192.168.0.116:mdqs > 172.217.163.164:sgcp S
+>>>
+
+18. data presentation using table
+
+More syn scan
+ans, unans = sr(IP(dst="192.168.56.90")/TCP(dport=(20,24),flags="S"))
+
+ans.summary(lfilter = lambda r: r[1].sprintf("%TCP.flags%") == "SA",prn=lambda r: r[1].sprintf("%TCP.sport% is open"))   
+ans.summary( lambda r: r[1].sprintf("%TCP.sport% \t %TCP.flags%") )
+
+
+>>> ans.make_table(
+...     lambda s,r: (s.dst, s.dport,
+...             r.sprintf("{TCP:%TCP.flags%}{ICMP:%IP.src% - %ICMP.type%}")))
+    172.217.163.164
+443 SA
+
+
+19. Print only packets that match a condition
+ ans.nsummary(lfilter = lambda r: r[1].sprintf("%TCP.flags%") == "SA")
+
+>>> ans.summary(lfilter = lambda r: r[1].sprintf("%TCP.flags%") == "SA",prn=lambda s,r: r.sprintf("%TCP.sport% is open"))
+https is open
+>>>
+
+20. REport open ports and dump a latex table
+>>> report_ports("192.168.0.101",(440,443))
+Begin emission:
+Finished sending 4 packets.
+...*.*.*.*
+Received 10 packets, got 4 answers, remaining 0 packets
+'\\begin{tabular}{|r|l|l|}\n\\hline\n\\hline\nsgcp & closed & TCP RA \\\\\ndecvms_sysmgt & closed & TCP RA \\\\\ncvc_hostd & closed & TCP RA \\\\\nhttps & closed & TCP RA \\\\\n\\hline\n\\hline\n\\end{tabular}\n'
+
+
+21. traceroute
+ans, unans = sr(IP(dst="www.google.com", ttl=(1,25),id=RandShort())/TCP(flags=0x2))
+Begin emission:
+Finished sending 25 packets.
+.....*.....*.*.*.*..*.*.**...**..*..*..*..*..*..*..*..*..*....*......*.*..................................................................................................................................................................^C
+Received 234 packets, got 23 answers, remaining 2 packets
+
+for snd,rcv in ans:
+    print (snd.ttl, rcv.src, isinstance(rcv.payload, TCP))
+
+1 192.168.0.1 False
+2 10.216.0.1 False
+3 10.200.150.41 False
+4 72.14.242.244 False
+5 216.239.54.67 False
+6 142.251.55.217 False
+7 10.200.150.25 False
+8 142.250.182.4 True
+9 142.250.182.4 True
+10 142.250.182.4 True
+11 142.250.182.4 True
+12 142.250.182.4 True
+13 142.250.182.4 True
+14 142.250.182.4 True
+15 142.250.182.4 True
+16 142.250.182.4 True
+17 142.250.182.4 True
+18 142.250.182.4 True
+19 142.250.182.4 True
+20 142.250.182.4 True
+21 142.250.182.4 True
+22 142.250.182.4 True
+23 142.250.182.4 True
+
+22. lsc(): list all commands
+
+23. geolocation information
+
+
+24. install graphviz and imagemagick
+
+
+25. ans.conversations()
+
+26. create a listen socket in python. write client in scapy
+
+
+27. read and write pcap
+
+
+28. sniff
+
+>>> sniff()
+^C<Sniffed: TCP:31 UDP:28 ICMP:0 Other:27>
+>>> a=_
+>>> a
+<Sniffed: TCP:31 UDP:28 ICMP:0 Other:27>
+>>> a.nsummary
+<bound method _PacketList.nsummary of <Sniffed: TCP:31 UDP:28 ICMP:0 Other:27>>
+>>> a.nsummary()
+0000 Ether / ARP who has 192.168.0.5 says 192.168.0.1
+0001 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0002 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0003 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address f0:18:98:8c:04:6a
+0004 Ether / IP / UDP / DNS Ans "b'KASIVAKU-M-R12H._companion-link._tcp.local.'"
+0005 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address 8a:59:46:0c:90:11
+0006 Ether / IP / TCP 192.168.0.116:54270 > 34.68.219.28:wsmans A
+0007 Ether / IP / TCP 34.68.219.28:wsmans > 192.168.0.116:54270 A
+0008 Ether / IP / TCP 192.168.0.116:54270 > 34.68.219.28:wsmans A
+0009 Ether / IP / TCP 34.68.219.28:wsmans > 192.168.0.116:54270 A
+0010 Ether / ARP who has 192.168.0.5 says 192.168.0.1
+0011 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0012 802.3 36:bd:fe:d6:11:06 > ff:ff:ff:ff:ff:ff / LLC / Raw
+0013 Ether / ARP who has 192.168.0.19 says 192.168.0.1
+0014 Ether / IPv6 / UDP / DNS Qry "b'lb._dns-sd._udp.local.'"
+0015 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address 88:e9:fe:6b:26:11
+0016 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address 8a:59:46:0c:90:11
+0017 Ether / IPv6 / ICMPv6ND_NA / ICMPv6 Neighbor Discovery Option - Destination Link-Layer Address bc:b8:63:97:9f:ba
+0018 Ether / IPv6 / UDP / DNS Ans "b'KASIVAKU-M-R12H._companion-link._tcp.local.'"
+0019 Ether / ARP who has 192.168.0.5 says 192.168.0.1
+0020 Ether / IP / UDP / DNS Qry "b'_airplay._tcp.local.'"
+0021 Ether / IPv6 / UDP / DNS Qry "b'_airplay._tcp.local.'"
+0022 Ether / ARP who has 192.168.0.19 says 192.168.0.1
+0023 Ether / IP / UDP / DNS Qry "b'lb._dns-sd._udp.local.'"
+0024 Ether / IPv6 / UDP / DNS Qry "b'lb._dns-sd._udp.local.'"
+0025 Ether / ARP who has 192.168.0.9 says 192.168.0.1
+0026 Ether / ARP who has 192.168.0.19 says 192.168.0.1
+0027 Ether / IP / TCP 162.125.35.134:https > 192.168.0.116:65435 PA / Raw
+0028 Ether / IP / TCP 192.168.0.116:65435 > 162.125.35.134:https A
+0029 Ether / IP / TCP 192.168.0.116:65435 > 162.125.35.134:https PA / Raw
+0030 Ether / IP / TCP 162.125.35.134:https > 192.168.0.116:65435 A
+0031 Ether / IP / TCP 192.168.0.116:65435 > 162.125.35.134:https PA / Raw
+0032 Ether / ARP who has 192.168.0.9 says 192.168.0.1
+0033 Ether / IP / UDP 192.168.0.136:52628 > 239.255.255.250:ssdp / Raw
+0034 Ether / IP / TCP 192.168.0.116:49223 > 52.114.128.70:https PA / Raw
+0035 Ether / IP / TCP 192.168.0.116:49223 > 52.114.128.70:https FA
+0036 Ether / IP / TCP 162.125.35.134:https > 192.168.0.116:65435 A
+0037 Ether / IP / UDP / DNS Qry "b'_homekit._tcp.local.'"
+0038 Ether / IPv6 / UDP / DNS Qry "b'_homekit._tcp.local.'"
+0039 Ether / IP / TCP 52.114.128.70:https > 192.168.0.116:49223 A
+0040 Ether / IP / TCP 52.114.128.70:https > 192.168.0.116:49223 FA
+0041 Ether / IP / TCP 192.168.0.116:49223 > 52.114.128.70:https A
+0042 Ether / IP / TCP 192.168.0.116:49197 > 54.213.235.242:https PA / Raw
+0043 Ether / ARP who has 192.168.0.123 says 192.168.0.1
+0044 Ether / IP / UDP 192.168.0.136:17500 > 192.168.0.255:17500 / Raw
+0045 Ether / IP / TCP 54.213.235.242:https > 192.168.0.116:49197 PA / Raw
+0046 Ether / IP / TCP 192.168.0.116:49197 > 54.213.235.242:https A
+0047 Ether / IP / TCP 192.168.0.116:59106 > 20.198.162.78:https PA / Raw
+0048 Ether / IP / TCP 20.198.162.78:https > 192.168.0.116:59106 A
+0049 Ether / IP / TCP 192.168.0.116:59106 > 20.198.162.78:https PA / Raw
+0050 Ether / ARP who has 192.168.0.9 says 192.168.0.1
+0051 Ether / IP / UDP 192.168.0.136:52628 > 239.255.255.250:ssdp / Raw
+0052 Ether / IP / TCP 20.198.162.78:https > 192.168.0.116:59106 PA / Raw
+0053 Ether / IP / TCP 192.168.0.116:59106 > 20.198.162.78:https A
+0054 Ether / IP / UDP / DNS Qry "b'lb._dns-sd._udp.local.'"
+0055 Ether / IPv6 / UDP / DNS Qry "b'lb._dns-sd._udp.local.'"
+0056 Ether / IP / UDP 192.168.0.136:52628 > 239.255.255.250:ssdp / Raw
+0057 Ether / IP / TCP 192.168.0.116:49217 > 3.213.186.241:https PA / Raw
+0058 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address bc:b8:63:97:9f:ba
+0059 Ether / IPv6 / ICMPv6 Neighbor Discovery - Neighbor Advertisement (tgt: fe80::189f:619:2286:4772)
+0060 Ether / IP / TCP 3.213.186.241:https > 192.168.0.116:49217 PA / Raw
+0061 Ether / IP / TCP 192.168.0.116:49217 > 3.213.186.241:https A
+0062 Ether / IP / UDP 192.168.0.136:52628 > 239.255.255.250:ssdp / Raw
+0063 Ether / ARP who has 192.168.0.101 says 192.168.0.1
+0064 Ether / ARP who has 192.168.0.102 says 192.168.0.1
+0065 Ether / ARP who has 192.168.0.103 says 192.168.0.1
+0066 Ether / ARP who has 192.168.0.113 says 192.168.0.1
+0067 Ether / ARP who has 192.168.0.119 says 192.168.0.1
+0068 Ether / ARP who has 192.168.0.120 says 192.168.0.1
+0069 Ether / ARP who has 192.168.0.131 says 192.168.0.1
+0070 Ether / ARP who has 192.168.0.122 says 192.168.0.1
+0071 Ether / ARP who has 192.168.0.125 says 192.168.0.1
+0072 Ether / IP / TCP 192.168.0.116:64199 > 35.174.127.31:https PA / Raw
+0073 Ether / IP / UDP / DNS Qry "b'dnszombie.cisco.com.'"
+0074 Ether / IP / UDP / DNS Ans
+0075 Ether / IP / UDP / DNS Qry "b'debug.opendns.com.'"
+0076 Ether / IP / TCP 35.174.127.31:https > 192.168.0.116:64199 A
+0077 Ether / IP / UDP / DNS Ans
+0078 Ether / IP / UDP 192.168.0.116:52316 > 208.67.222.222:https / Raw
+0079 Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:52316 / Raw
+0080 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0081 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0082 Ether / IP / TCP 192.168.0.116:49226 > 54.213.235.242:https PA / Raw
+0083 Ether / IP / UDP / DNS Ans "b'KASIVAKU-M-R12H._companion-link._tcp.local.'"
+0084 Ether / IP / TCP 54.213.235.242:https > 192.168.0.116:49226 PA / Raw
+0085 Ether / IP / TCP 192.168.0.116:49226 > 54.213.235.242:https A
+>>>
+
+>>> sniff(count=2)                                                                                                                                                                                         
+<Sniffed: TCP:0 UDP:0 ICMP:2 Other:0>
+>>> a=_                                                                                                                                                                                                    
+>>> a.show()                                                                                                                                                                                               
+0000 Ether / IP / ICMP 10.0.2.15 > 216.58.200.132 echo-request 0 / Raw
+0001 Ether / IP / ICMP 216.58.200.132 > 10.0.2.15 echo-reply 0 / Raw
+
+29. Conversation
+>>> a.conversations()                                                                                                                                                                                      
+ERROR: do_graph(): executing 'display' failed
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/scapy/utils.py", line 627, in do_graph
+    target = subprocess.Popen([conf.prog.display],
+  File "/usr/lib/python3.8/subprocess.py", line 854, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.8/subprocess.py", line 1702, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'display'
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: conv Pages: 1 -->
+<svg width="176pt" height="131pt"
+ viewBox="0.00 0.00 175.69 131.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 127)">
+<title>conv</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-127 171.69,-127 171.69,4 -4,4"/>
+<!-- 10.0.2.15 -->
+<g id="node1" class="node">
+<title>10.0.2.15</title>
+<ellipse fill="none" stroke="black" cx="83.84" cy="-105" rx="54.69" ry="18"/>
+<text text-anchor="middle" x="83.84" y="-101.3" font-family="Times,serif" font-size="14.00">10.0.2.15</text>
+</g>
+<!-- 216.58.200.132 -->
+<g id="node2" class="node">
+<title>216.58.200.132</title>
+<ellipse fill="none" stroke="black" cx="83.84" cy="-18" rx="83.69" ry="18"/>
+<text text-anchor="middle" x="83.84" y="-14.3" font-family="Times,serif" font-size="14.00">216.58.200.132</text>
+</g>
+<!-- 10.0.2.15&#45;&gt;216.58.200.132 -->
+<g id="edge1" class="edge">
+<title>10.0.2.15&#45;&gt;216.58.200.132</title>
+<path fill="none" stroke="black" d="M74.39,-87.07C70.14,-77.47 66.55,-65.19 68.84,-54 69.43,-51.15 70.26,-48.24 71.23,-45.38"/>
+<polygon fill="black" stroke="black" points="74.51,-46.58 74.93,-36 68,-44.02 74.51,-46.58"/>
+<text text-anchor="middle" x="73.84" y="-57.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 216.58.200.132&#45;&gt;10.0.2.15 -->
+<g id="edge2" class="edge">
+<title>216.58.200.132&#45;&gt;10.0.2.15</title>
+<path fill="none" stroke="black" d="M83.84,-36.18C83.84,-47.81 83.84,-63.42 83.84,-76.73"/>
+<polygon fill="black" stroke="black" points="80.34,-76.8 83.84,-86.8 87.34,-76.8 80.34,-76.8"/>
+<text text-anchor="middle" x="88.84" y="-57.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+</g>
+</svg>
+>>> a.show(prn=lambda x: x.show())                                                                                                                                                                         
+0000 ###[ Ethernet ]### 
+  dst= 52:54:00:12:35:02
+  src= 08:00:27:81:0f:bf
+  type= IPv4
+###[ IP ]### 
+     version= 4
+     ihl= 5
+     tos= 0x0
+     len= 84
+     id= 49250
+     flags= DF
+     frag= 0
+     ttl= 64
+     proto= icmp
+     chksum= 0xcd78
+     src= 10.0.2.15
+     dst= 216.58.200.132
+     \options\
+###[ ICMP ]### 
+        type= echo-request
+        code= 0
+        chksum= 0xe005
+        id= 0x1
+        seq= 0x6
+###[ Raw ]### 
+           load= '\xad\xb3\x07a\x00\x00\x00\x00\xa0\x0b\x04\x00\x00\x00\x00\x00\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !"#$%&\'()*+,-./01234567'
+
+None
+0001 ###[ Ethernet ]### 
+  dst= 08:00:27:81:0f:bf
+  src= 52:54:00:12:35:02
+  type= IPv4
+###[ IP ]### 
+     version= 4
+     ihl= 5
+     tos= 0x18
+     len= 84
+     id= 504
+     flags= 
+     frag= 0
+     ttl= 117
+     proto= icmp
+     chksum= 0x96cb
+     src= 216.58.200.132
+     dst= 10.0.2.15
+     \options\
+###[ ICMP ]### 
+        type= echo-reply
+        code= 0
+        chksum= 0xe805
+        id= 0x1
+        seq= 0x6
+###[ Raw ]### 
+           load= '\xad\xb3\x07a\x00\x00\x00\x00\xa0\x0b\x04\x00\x00\x00\x00\x00\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !"#$%&\'()*+,-./01234567'
+
+None
+
+30. Do wget www.google.com in one terminal
+>>> sniff()
+^C<Sniffed: TCP:103 UDP:33 ICMP:0 Other:44>
+>>> a=_
+>>> a.show()
+0000 Ether / ARP who has 192.168.0.101 says 192.168.0.1
+0001 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0002 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0003 Ether / ARP who has 192.168.0.102 says 192.168.0.1
+0004 Ether / ARP who has 192.168.0.103 says 192.168.0.1
+0005 Ether / ARP who has 192.168.0.113 says 192.168.0.1
+0006 Ether / ARP who has 192.168.0.120 says 192.168.0.1
+0007 Ether / ARP who has 192.168.0.131 says 192.168.0.1
+0008 Ether / ARP who has 192.168.0.119 says 192.168.0.1
+0009 Ether / ARP who has 192.168.0.115 says 192.168.0.116
+0010 Ether / ARP who has 192.168.0.122 says 192.168.0.1
+0011 Ether / ARP who has 192.168.0.125 says 192.168.0.1
+0012 Ether / ARP who has 192.168.0.124 says 192.168.0.1
+0013 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0014 Ether / ARP is at aa:cc:97:5b:31:f5 says 192.168.0.115
+0015 Ether / IP / UDP / DNS Ans "b'KASIVAKU-M-R12H._companion-link._tcp.local.'"
+0016 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw
+0017 Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0018 Ether / 192.168.0.115 > 224.0.0.22 igmp / Raw
+0019 Ether / IP / TCP 172.217.194.189:https > 192.168.0.116:52358 PA / Raw
+0020 Ether / IP / TCP 192.168.0.116:52358 > 172.217.194.189:https A
+0021 Ether / ARP who has 192.168.0.101 says 192.168.0.1
+0022 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0023 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0024 Ether / ARP who has 192.168.0.102 says 192.168.0.1
+0025 Ether / ARP who has 192.168.0.103 says 192.168.0.1
+0026 Ether / ARP who has 192.168.0.113 says 192.168.0.1
+0027 Ether / ARP who has 192.168.0.120 says 192.168.0.1
+0028 Ether / ARP who has 192.168.0.131 says 192.168.0.1
+0029 Ether / ARP who has 192.168.0.119 says 192.168.0.1
+0030 Ether / ARP who has 192.168.0.122 says 192.168.0.1
+0031 Ether / ARP who has 192.168.0.125 says 192.168.0.1
+0032 Ether / ARP who has 192.168.0.124 says 192.168.0.1
+0033 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0034 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0035 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0036 Ether / IP / UDP / DNS Ans "b'Sivakumars ipad._companion-link._tcp.local.'"
+0037 Ether / IPv6 / UDP / DNS Ans "b'Sivakumars ipad._companion-link._tcp.local.'"
+0038 Ether / ARP who has 192.168.0.101 says 192.168.0.1
+0039 Ether / ARP who has 192.168.0.102 says 192.168.0.1
+0040 Ether / ARP who has 192.168.0.103 says 192.168.0.1
+0041 Ether / ARP who has 192.168.0.113 says 192.168.0.1
+0042 Ether / ARP who has 192.168.0.120 says 192.168.0.1
+0043 Ether / ARP who has 192.168.0.131 says 192.168.0.1
+0044 Ether / ARP who has 192.168.0.119 says 192.168.0.1
+0045 Ether / ARP who has 192.168.0.122 says 192.168.0.1
+0046 Ether / ARP who has 192.168.0.125 says 192.168.0.1
+0047 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address 88:e9:fe:6b:26:11
+0048 Ether / ARP who has 192.168.0.124 says 192.168.0.1
+0049 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0050 Ether / IPv6 / ICMPv6 Neighbor Discovery - Neighbor Advertisement (tgt: fe80::8d4:7611:8c20:3e78)
+0051 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw
+0052 Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0053 Ether / 192.168.0.115 > 224.0.0.22 igmp / Raw
+0054 Ether / IP / TCP 192.168.0.116:64194 > 20.197.71.89:https A
+0055 Ether / IP / TCP 192.168.0.115:50585 > 192.168.0.116:64997 A
+0056 Ether / IP / TCP 192.168.0.116:64997 > 192.168.0.115:50585 A
+0057 Ether / IP / TCP 20.197.71.89:https > 192.168.0.116:64194 A
+0058 Ether / IP / TCP 64.104.142.35:4287 > 192.168.0.116:65152 PA / Raw
+0059 Ether / IP / TCP 192.168.0.116:65152 > 64.104.142.35:4287 A
+0060 Ether / IP / TCP 192.168.0.116:52928 > 52.98.63.34:https A
+0061 Ether / IP / TCP 52.98.63.34:https > 192.168.0.116:52928 A
+0062 Ether / IP / TCP 192.168.0.116:52910 > 52.43.131.249:https PA / Raw
+0063 Ether / IP / TCP 52.43.131.249:https > 192.168.0.116:52910 PA / Raw
+0064 Ether / IP / TCP 192.168.0.116:52910 > 52.43.131.249:https A
+0065 Ether / IP / UDP / DNS Qry "b'_homekit._tcp.local.'"
+0066 Ether / IPv6 / UDP / DNS Qry "b'_homekit._tcp.local.'"
+0067 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 PA / NBTSession / SMB2_Header / Raw
+0068 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw
+0069 Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0070 Ether / IP / TCP 192.168.0.136:65423 > 192.168.0.116:microsoft_ds PA / NBTSession / SMB2_Header / Raw
+0071 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 A
+0072 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 A
+0073 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 PA / NBTSession / SMB2_Header / Raw
+0074 Ether / IP / TCP 192.168.0.136:65423 > 192.168.0.116:microsoft_ds A
+0075 Ether / IP / UDP 192.168.0.116:56997 > 208.67.222.222:https / Raw
+0076 Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:56997 / Raw
+0077 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https S
+0078 Ether / IP / UDP 192.168.0.116:52495 > 208.67.222.222:https / Raw
+0079 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 SA
+0080 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0081 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw
+0082 Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:52495 / Raw
+0083 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0084 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A / Raw
+0085 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0086 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0087 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A / Raw
+0088 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0089 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0090 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0091 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0092 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw
+0093 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw
+0094 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw
+0095 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0096 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0097 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0098 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0099 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0100 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0101 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0102 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0103 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0104 Ether / IP / UDP 192.168.0.116:59225 > 208.67.222.222:https / Raw
+0105 Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:59225 / Raw
+0106 Ether / IP / UDP 192.168.0.116:64570 > 208.67.222.222:https / Raw
+0107 Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:64570 / Raw
+0108 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http S
+0109 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 SA
+0110 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0111 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http PA / Raw
+0112 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A
+0113 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0114 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0115 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0116 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0117 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0118 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0119 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0120 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0121 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0122 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0123 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0124 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0125 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0126 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0127 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0128 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 PA / Raw
+0129 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0130 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http FA
+0131 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 FA
+0132 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0133 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0134 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw
+0135 Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0136 Ether / IP / UDP 192.168.0.109:17500 > 255.255.255.255:17500 / Raw
+0137 Ether / IP / UDP 192.168.0.109:17500 > 192.168.0.255:17500 / Raw
+0138 Ether / IP / TCP 52.48.229.36:https > 192.168.0.116:61139 PA / Raw
+0139 Ether / IP / TCP 192.168.0.116:61139 > 52.48.229.36:https A
+0140 Ether / IP / TCP 192.168.0.116:61139 > 52.48.229.36:https PA / Raw
+0141 Ether / IP / TCP 52.48.229.36:https > 192.168.0.116:61139 A
+0142 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0143 Ether / IP / UDP / DNS Qry "b'_sleep-proxy._udp.local.'"
+0144 Ether / IPv6 / UDP / DNS Qry "b'_sleep-proxy._udp.local.'"
+0145 Ether / IP / UDP / DNS Qry "b'cloud-ec-asn.amp.cisco.com.'"
+0146 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0147 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0148 Ether / IP / UDP / DNS Ans "107.20.229.191"
+0149 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https S
+0150 Ether / IP / UDP / DNS Ans "b'KASIVAKU-M-R12H._companion-link._tcp.local.'"
+0151 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 SA
+0152 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0153 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw
+0154 Ether / IP / UDP / DNS Qry "b'casper.cisco.com.'"
+0155 Ether / ARP who has 192.168.0.126 says 192.168.0.1
+0156 Ether / IP / UDP / DNS Ans "173.36.110.12"
+0157 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A
+0158 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw
+0159 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw
+0160 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw
+0161 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw
+0162 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw
+0163 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw
+0164 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0165 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0166 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0167 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw
+0168 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw
+0169 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0170 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw
+0171 Ether / ARP who has 192.168.0.128 says 192.168.0.1
+0172 Ether / fe80::14e0:e649:a55b:e5b > ff02::16 (0) / IPv6ExtHdrHopByHop / ICMPv6MLReport2
+0173 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0174 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"
+0175 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw
+0176 Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0177 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw
+0178 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0179 Ether / IP / UDP / DNS Qry "b'casper.cisco.com.'"
+>>>
+
+Split the packet list into answered/unanswered list
+>>> a.sr()
+(<Results: TCP:37 UDP:8 ICMP:0 Other:2>, <PacketList: TCP:29 UDP:17 ICMP:0 Other:40>)
+
+ans,unans=_
+
+>>> ans.show()
+0000 Ether / IP / UDP / DNS Qry "b'_companion-link._tcp.local.'"  ==> Ether / IP / UDP / DNS Ans "b'Sivakumars ipad._companion-link._tcp.local.'"
+0001 Ether / IPv6 / UDP / DNS Qry "b'_companion-link._tcp.local.'"  ==> Ether / IPv6 / UDP / DNS Ans "b'Sivakumars ipad._companion-link._tcp.local.'"
+0002 Ether / ARP who has 192.168.0.115 says 192.168.0.116 ==> Ether / ARP is at aa:cc:97:5b:31:f5 says 192.168.0.115
+0003 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0004 Ether / IP / TCP 172.217.194.189:https > 192.168.0.116:52358 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52358 > 172.217.194.189:https A
+0005 Ether / IPv6 / ICMPv6ND_NS / ICMPv6 Neighbor Discovery Option - Source Link-Layer Address 88:e9:fe:6b:26:11 ==> Ether / IPv6 / ICMPv6 Neighbor Discovery - Neighbor Advertisement (tgt: fe80::8d4:7611:8c20:3e78)
+0006 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0007 Ether / IP / TCP 192.168.0.116:64194 > 20.197.71.89:https A ==> Ether / IP / TCP 20.197.71.89:https > 192.168.0.116:64194 A
+0008 Ether / IP / TCP 192.168.0.115:50585 > 192.168.0.116:64997 A ==> Ether / IP / TCP 192.168.0.116:64997 > 192.168.0.115:50585 A
+0009 Ether / IP / TCP 64.104.142.35:4287 > 192.168.0.116:65152 PA / Raw ==> Ether / IP / TCP 192.168.0.116:65152 > 64.104.142.35:4287 A
+0010 Ether / IP / TCP 192.168.0.116:52928 > 52.98.63.34:https A ==> Ether / IP / TCP 52.98.63.34:https > 192.168.0.116:52928 A
+0011 Ether / IP / TCP 192.168.0.116:52910 > 52.43.131.249:https PA / Raw ==> Ether / IP / TCP 52.43.131.249:https > 192.168.0.116:52910 PA / Raw
+0012 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 PA / NBTSession / SMB2_Header / Raw ==> Ether / IP / TCP 192.168.0.136:65423 > 192.168.0.116:microsoft_ds PA / NBTSession / SMB2_Header / Raw
+0013 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0014 Ether / IP / TCP 192.168.0.116:microsoft_ds > 192.168.0.136:65423 PA / NBTSession / SMB2_Header / Raw ==> Ether / IP / TCP 192.168.0.136:65423 > 192.168.0.116:microsoft_ds A
+0015 Ether / IP / UDP 192.168.0.116:56997 > 208.67.222.222:https / Raw ==> Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:56997 / Raw
+0016 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https S ==> Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 SA
+0017 Ether / IP / UDP 192.168.0.116:52495 > 208.67.222.222:https / Raw ==> Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:52495 / Raw
+0018 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw ==> Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0019 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0020 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0021 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw ==> Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A
+0022 Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https PA / Raw ==> Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw
+0023 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 A ==> Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0024 Ether / IP / TCP 17.248.162.135:https > 192.168.0.116:52931 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52931 > 17.248.162.135:https A
+0025 Ether / IP / UDP 192.168.0.116:59225 > 208.67.222.222:https / Raw ==> Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:59225 / Raw
+0026 Ether / IP / UDP 192.168.0.116:64570 > 208.67.222.222:https / Raw ==> Ether / IP / UDP 208.67.222.222:https > 192.168.0.116:64570 / Raw
+0027 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http S ==> Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 SA
+0028 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http PA / Raw ==> Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A
+0029 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw ==> Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0030 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw ==> Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0031 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw ==> Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0032 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A ==> Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 A / Raw
+0033 Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http A
+0034 Ether / IP / TCP 192.168.0.116:52932 > 142.250.182.68:http FA ==> Ether / IP / TCP 142.250.182.68:http > 192.168.0.116:52932 FA
+0035 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+0036 Ether / IP / TCP 52.48.229.36:https > 192.168.0.116:61139 PA / Raw ==> Ether / IP / TCP 192.168.0.116:61139 > 52.48.229.36:https A
+0037 Ether / IP / TCP 192.168.0.116:61139 > 52.48.229.36:https PA / Raw ==> Ether / IP / TCP 52.48.229.36:https > 192.168.0.116:61139 A
+0038 Ether / IP / UDP / DNS Qry "b'cloud-ec-asn.amp.cisco.com.'"  ==> Ether / IP / UDP / DNS Ans "107.20.229.191"
+0039 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https S ==> Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 SA
+0040 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw ==> Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A
+0041 Ether / IP / UDP / DNS Qry "b'casper.cisco.com.'"  ==> Ether / IP / UDP / DNS Ans "173.36.110.12"
+0042 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 A / Raw ==> Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0043 Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https A
+0044 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw ==> Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw
+0045 Ether / IP / TCP 192.168.0.116:52933 > 52.70.59.121:https PA / Raw ==> Ether / IP / TCP 52.70.59.121:https > 192.168.0.116:52933 PA / Raw
+0046 Ether / IP / TCP 192.168.0.136:ms_wbt_server > 192.168.0.116:52744 PA / Raw ==> Ether / IP / TCP 192.168.0.116:52744 > 192.168.0.136:ms_wbt_server A
+>>>
+
+>>> sniff(lfilter=lambda s:s.haslayer(TCP))
+^C<Sniffed: TCP:44 UDP:0 ICMP:0 Other:0>
+>>>
+>>> sniff(lfilter=lambda s:s.haslayer(IP) and s[IP].dst=="192.168.0.101")
+
+
+31. tcp 3 way handshake with google.com
+Run wireshark in one window (filter: port 1500)
+Run tcp_syn.py. In wireshark you can see the packets. Note that the 3rd packet is not the ACK but a RST instead sent by the kernel. We have to let the kernel send in uninitiated packet to the process.
+https://0xbharath.github.io/art-of-packet-crafting-with-scapy/network_recon/service_discovery/index.html
+
+32. idle scan
+https://0xbharath.github.io/art-of-packet-crafting-with-scapy/network_recon/service_discovery/index.html#ip-id-scan-nmap-idle-scan
+
+33. 
