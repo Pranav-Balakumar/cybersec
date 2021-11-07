@@ -1433,4 +1433,52 @@ https://0xbharath.github.io/art-of-packet-crafting-with-scapy/network_recon/serv
 https://0xbharath.github.io/art-of-packet-crafting-with-scapy/network_recon/service_discovery/index.html#ip-id-scan-nmap-idle-scan
 
 more and more can be added here..
-33. 
+
+
+33. pcap
+generate pcap from wireshark.
+load into scapy:
+
+f=rdpcap("/home/security/test.pcapng")
+f.show()
+
+f[1].show()
+hexdump(f[1])
+cannot resend a packet
+p=f[1]
+sr1(p) -> gets no response.
+p=IP(dst="www.google.com")/ICMP()
+sr1(p)
+
+for packet in f:
+    packet.show()
+
+for packet in f:
+    if packet.haslayer(IP) and packet[IP].dst=="142.250.195.228":
+       packet.show()
+
+for packet in f:
+    if IP in packet and packet[IP].dst=="142.250.195.228":
+       packet.show()
+
+for pkt in PcapReader("testicmp.pcapng"): 
+    if IP in pkt: p.show() 
+
+f=rdpcap("/home/security/testicmp.pcapng");  
+sessions = f.sessions() 
+fin = 0 
+for s in sessions:  
+    for p in sessions[s]: 
+        if IP in p:  
+            p.show() 
+            fin = 1 
+        else: continue 
+    if fin == 1: break
+
+
+
+
+
+
+
+
